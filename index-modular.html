@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedInify - Markdown to LinkedIn Converter</title>
+    <meta name="description" content="Convert Markdown to LinkedIn posts offline. Private, fast, and works for everyone - from beginners to professionals.">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0077b5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="LinkedInify">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- External Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/5.1.2/marked.min.js"></script>
+    
+    <!-- Application Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-top">
+                    <div></div>
+                    <div class="theme-controls">
+                        <button class="theme-toggle" onclick="window.linkedinifyApp?.modules.theme.toggle()">🌙 Dark Mode</button>
+                        <button class="history-toggle" onclick="toggleHistory()">📚 History</button>
+                    </div>
+                </div>
+                <h1>🚀 LinkedInify</h1>
+                <p class="subtitle">Transform any content into LinkedIn-ready posts. Works offline, keeps your data private, and supports all languages & topics.</p>
+                
+                <div class="feature-badges">
+                    <div class="badge highlight">🔒 100% Private & Offline</div>
+                    <div class="badge">🌍 All Languages</div>
+                    <div class="badge">📱 Mobile App</div>
+                    <div class="badge highlight">🧠 AI-Powered Titles</div>
+                    <div class="badge">⚡ Instant Preview</div>
+                    <div class="badge highlight">🆓 Forever Free</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="toolbar">
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="window.linkedinifyApp?.formatText('**', '**')" title="Bold (Ctrl+B)"><strong>B</strong></button>
+                <button class="toolbar-btn" onclick="window.linkedinifyApp?.formatText('*', '*')" title="Italic (Ctrl+I)"><em>I</em></button>
+                <button class="toolbar-btn" onclick="window.linkedinifyApp?.formatText('`', '`')" title="Inline Code">&lt;/&gt;</button>
+            </div>
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="window.linkedinifyApp?.formatHeading(1)" title="Big Heading">H1</button>
+                <button class="toolbar-btn" onclick="window.linkedinifyApp?.formatHeading(2)" title="Medium Heading">H2</button>
+                <button class="toolbar-btn" onclick="window.linkedinifyApp?.formatHeading(3)" title="Small Heading">H3</button>
+            </div>
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="insertList('- ')" title="Bullet List">• List</button>
+                <button class="toolbar-btn" onclick="insertList('1. ')" title="Numbered List">1. List</button>
+                <button class="toolbar-btn" onclick="window.linkedinifyApp?.formatText('> ', '')" title="Quote">Quote</button>
+            </div>
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="insertCodeBlock()" title="Code Block">{ }</button>
+                <button class="toolbar-btn" onclick="insertLink()" title="Link">🔗</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">✍️ Write Your Content</h2>
+                <div class="save-controls">
+                    <button class="example-btn" onclick="loadExample()">📋 Try Example</button>
+                    <button class="save-btn" onclick="window.linkedinifyApp?.saveCurrentPost()">💾 Save Post</button>
+                </div>
+                <textarea 
+                    class="markdown-input" 
+                    id="markdownInput" 
+                    placeholder="Start writing here! You can use:
+
+# Big Headings for titles
+
+## Medium headings for sections
+
+Write **bold text** and *italic text* easily.
+
+- Make bullet lists
+- Like this one
+- Very simple!
+
+> Add inspiring quotes
+
+Perfect for ANY topic - business, personal stories, tutorials, announcements! 🌟"
+                ></textarea>
+                <button class="convert-btn" onclick="window.linkedinifyApp?.convertMarkdown()">🚀 Make LinkedIn Ready</button>
+                <div id="status" class="status" style="display: none;"></div>
+            </div>
+            
+            <div class="preview-section">
+                <h2 class="section-title">👀 HTML Preview</h2>
+                <div class="preview-area" id="htmlPreview">Your HTML preview will appear here...</div>
+                <div class="note">📌 This shows how your content renders with full HTML formatting</div>
+            </div>
+
+            <div class="output-section">
+                <h2 class="section-title">📋 LinkedIn Ready</h2>
+                <div class="linkedin-preview-controls">
+                    <button class="linkedin-mode-btn active" data-theme="light" onclick="setLinkedInTheme('light')">☀️ Light</button>
+                    <button class="linkedin-mode-btn" data-theme="dark" onclick="setLinkedInTheme('dark')">🌙 Dark</button>
+                    <button class="linkedin-mode-btn active" data-view="web" onclick="setLinkedInView('web')">💻 Desktop</button>
+                    <button class="linkedin-mode-btn" data-view="mobile" onclick="setLinkedInView('mobile')">📱 Mobile</button>
+                </div>
+                <div class="output-preview linkedin-light" id="linkedinPreview">Your LinkedIn-optimized content will appear here...</div>
+                <button class="copy-btn" id="copyBtn" onclick="copyToClipboard()">📋 Copy for LinkedIn</button>
+                <div class="note">🎯 This shows exactly how your post will look on LinkedIn. Copy and paste directly!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Sidebar -->
+    <div class="history-sidebar" id="historySidebar">
+        <div class="history-header">
+            <h3>📚 Post History</h3>
+            <button class="close-btn" onclick="toggleHistory()">&times;</button>
+        </div>
+        <div class="history-content" id="historyContent">
+            <p class="note">Your saved posts will appear here...</p>
+        </div>
+    </div>
+
+    <!-- JavaScript Modules -->
+    <script src="js/modules/theme-manager.js"></script>
+    <script src="js/modules/content-converter.js"></script>
+    <script src="js/modules/history-manager.js"></script>
+    <script src="js/modules/preview-manager.js"></script>
+    <script src="js/modules/title-generator.js"></script>
+    <script src="js/app.js"></script>
+    
+    <!-- Legacy function wrappers for backward compatibility -->
+    <script>
+        // Wrapper functions for onclick handlers
+        function toggleHistory() {
+            window.linkedinifyApp?.modules.history.toggleSidebar();
+        }
+
+        function setLinkedInTheme(theme) {
+            window.linkedinifyApp?.modules.preview.setLinkedInTheme(theme);
+        }
+
+        function setLinkedInView(view) {
+            window.linkedinifyApp?.modules.preview.setLinkedInView(view);
+        }
+
+        function loadExample() {
+            const example = `# 🚀 5 Game-Changing LinkedIn Tips for 2024
+
+## Why Your Profile Matters More Than Ever
+
+Your LinkedIn profile is your **digital business card** and *professional story* combined.
+
+Here's what successful professionals do differently:
+
+- Optimize headlines with keywords
+- Share valuable industry insights 
+- Engage meaningfully with connections
+- Post consistently (3-4 times per week)
+
+> "Your network is your net worth" - Porter Gale
+
+### Pro Tip: Use Data
+
+\`\`\`javascript
+const engagement = posts.filter(post => 
+    post.likes > 100 && post.comments > 10
+);
+\`\`\`
+
+**Ready to level up your LinkedIn game?**
+
+What's your biggest LinkedIn challenge? Drop it in the comments! 👇
+
+#LinkedIn #Professional #Networking #Career`;
+
+            document.getElementById('markdownInput').value = example;
+            window.linkedinifyApp?.convertMarkdown();
+        }
+
+        function copyToClipboard() {
+            const content = document.getElementById('linkedinPreview').textContent;
+            
+            if (!content.trim()) {
+                window.linkedinifyApp?.showStatus('Please convert some content first!', 'error');
+                return;
+            }
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(content).then(() => {
+                    showCopySuccess();
+                }).catch(() => {
+                    fallbackCopy(content);
+                });
+            } else {
+                fallbackCopy(content);
+            }
+        }
+
+        function fallbackCopy(content) {
+            const textarea = document.createElement('textarea');
+            textarea.value = content;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-999999px';
+            textarea.style.top = '-999999px';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                showCopySuccess();
+            } catch (err) {
+                window.linkedinifyApp?.showStatus('Copy failed. Please select and copy manually.', 'error');
+            }
+            
+            document.body.removeChild(textarea);
+        }
+
+        function showCopySuccess() {
+            const btn = document.getElementById('copyBtn');
+            const originalText = btn.textContent;
+            
+            btn.textContent = '✅ Copied!';
+            btn.classList.add('copied');
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.remove('copied');
+            }, 2000);
+            
+            window.linkedinifyApp?.showStatus('Copied to clipboard! Ready to paste on LinkedIn.', 'success');
+        }
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registered:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('❌ Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

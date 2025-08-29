@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedInify - Markdown to LinkedIn Converter</title>
+    <meta name="description" content="Convert Markdown to LinkedIn posts offline. Privacy-first, AI-powered, and works everywhere.">
+    <meta name="keywords" content="markdown, linkedin, converter, pwa, offline, privacy-first, ai-powered, social media">
+    <meta name="author" content="Ankur Mursalin">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="LinkedInify - Markdown to LinkedIn Converter">
+    <meta property="og:description" content="Convert Markdown to LinkedIn posts offline. Privacy-first, AI-powered, and works everywhere.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ankurmursalin.github.io/linkedinify">
+    <meta property="og:image" content="https://ankurmursalin.github.io/linkedinify/icons/icon-512x512.png">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="LinkedInify - Markdown to LinkedIn Converter">
+    <meta name="twitter:description" content="Convert Markdown to LinkedIn posts offline. Privacy-first, AI-powered, and works everywhere.">
+    <meta name="twitter:image" content="https://ankurmursalin.github.io/linkedinify/icons/icon-512x512.png">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0077b5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="LinkedInify">
+    <meta name="msapplication-TileImage" content="/linkedinify/icons/icon-144x144.png">
+    <meta name="msapplication-TileColor" content="#0077b5">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/linkedinify/icons/icon-32x32.png">
+    <link rel="apple-touch-icon" href="/linkedinify/icons/icon-192x192.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="css/styles.css" as="style">
+    <link rel="preload" href="js/app.js" as="script" type="module">
+    
+    <!-- Prefetch DNS for external resources -->
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+</head>
+<body>
+    <!-- Critical Error Container -->
+    <div id="error-container" class="error-container" style="display: none;"></div>
+    
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">📝</div>
+            <h2>LinkedInify</h2>
+            <p>Loading your markdown to LinkedIn converter...</p>
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app" class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-top">
+                    <div class="header-brand">
+                        <h1>🚀 LinkedInify</h1>
+                        <span class="version">v2.0</span>
+                    </div>
+                    <div class="header-controls">
+                        <button class="theme-toggle" id="themeToggle" aria-label="Switch theme">
+                            🌙 Dark Mode
+                        </button>
+                        <button class="history-toggle" id="historyToggle" aria-label="Toggle history">
+                            📚 History
+                        </button>
+                    </div>
+                </div>
+                
+                <p class="subtitle">
+                    Transform any content into LinkedIn-ready posts. Works offline, keeps your data private, and supports all languages & topics.
+                </p>
+                
+                <div class="feature-badges">
+                    <div class="badge highlight">🔒 100% Private & Offline</div>
+                    <div class="badge">🌍 All Languages</div>
+                    <div class="badge">📱 Mobile App</div>
+                    <div class="badge highlight">🧠 AI-Powered Titles</div>
+                    <div class="badge">⚡ Instant Preview</div>
+                    <div class="badge highlight">🆓 Forever Free</div>
+                </div>
+
+                <div class="trust-indicators">
+                    <div class="trust-item">
+                        <div class="trust-icon">🛡️</div>
+                        <div class="trust-text">
+                            <span class="trust-label">Works Offline</span>
+                            <span class="trust-desc">Download once, use forever. No internet required after first load.</span>
+                        </div>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon">🔒</div>
+                        <div class="trust-text">
+                            <span class="trust-label">Your Data Stays Local</span>
+                            <span class="trust-desc">Everything stored on your device. Zero tracking, zero servers.</span>
+                        </div>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon">🌍</div>
+                        <div class="trust-text">
+                            <span class="trust-label">Universal Content</span>
+                            <span class="trust-desc">Perfect for any topic, any language, any user level.</span>
+                        </div>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon">📱</div>
+                        <div class="trust-text">
+                            <span class="trust-label">Install as App</span>
+                            <span class="trust-desc">Add to home screen. Works like a native mobile app.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-group">
+                <button class="toolbar-btn" data-action="bold" title="Bold (Ctrl+B)" aria-label="Bold">
+                    <strong>B</strong>
+                </button>
+                <button class="toolbar-btn" data-action="italic" title="Italic (Ctrl+I)" aria-label="Italic">
+                    <em>I</em>
+                </button>
+                <button class="toolbar-btn" data-action="code" title="Inline Code" aria-label="Inline Code">
+                    &lt;/&gt;
+                </button>
+            </div>
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" data-action="h1" title="Heading 1" aria-label="Heading 1">H1</button>
+                <button class="toolbar-btn" data-action="h2" title="Heading 2" aria-label="Heading 2">H2</button>
+                <button class="toolbar-btn" data-action="h3" title="Heading 3" aria-label="Heading 3">H3</button>
+            </div>
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" data-action="ul" title="Bullet List" aria-label="Bullet List">• List</button>
+                <button class="toolbar-btn" data-action="ol" title="Numbered List" aria-label="Numbered List">1. List</button>
+                <button class="toolbar-btn" data-action="quote" title="Quote" aria-label="Quote">Quote</button>
+            </div>
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" data-action="codeblock" title="Code Block" aria-label="Code Block">{ }</button>
+                <button class="toolbar-btn" data-action="link" title="Link" aria-label="Link">🔗</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Input Section -->
+            <section class="input-section">
+                <div class="section-header">
+                    <h2 class="section-title">✍️ Write Your Content</h2>
+                    <div class="section-controls">
+                        <button class="example-btn" id="loadExampleBtn">📋 Try Example</button>
+                        <button class="save-btn" id="savePostBtn">💾 Save Post</button>
+                    </div>
+                </div>
+                
+                <div class="input-container">
+                    <textarea 
+                        class="markdown-input" 
+                        id="markdownInput" 
+                        placeholder="Start writing here! You can use:
+
+# Big Headings for titles
+
+## Medium headings for sections
+
+Write **bold text** and *italic text* easily.
+
+- Make bullet lists
+- Like this one
+- Very simple!
+
+> Add inspiring quotes
+
+Share links: [Visit LinkedIn](https://linkedin.com)
+
+```
+Even add code examples
+console.log('Hello World!');
+```
+
+Perfect for ANY topic - business, personal stories, tutorials, announcements, or just sharing thoughts! 🌟"
+                        aria-label="Markdown input"
+                    ></textarea>
+                </div>
+                
+                <div class="input-footer">
+                    <button class="convert-btn" id="convertBtn">🚀 Make LinkedIn Ready</button>
+                    <div id="status" class="status" role="status" aria-live="polite"></div>
+                </div>
+            </section>
+            
+            <!-- Preview Section -->
+            <section class="preview-section">
+                <div class="section-header">
+                    <h2 class="section-title">👀 HTML Preview</h2>
+                </div>
+                
+                <div class="preview-container">
+                    <div class="preview-area" id="htmlPreview" role="region" aria-label="HTML preview">
+                        <p class="preview-placeholder">Your HTML preview will appear here...</p>
+                    </div>
+                </div>
+                
+                <div class="section-note">
+                    📌 This shows how your content renders with full HTML formatting
+                </div>
+            </section>
+
+            <!-- Output Section -->
+            <section class="output-section">
+                <div class="section-header">
+                    <h2 class="section-title">📋 LinkedIn Ready</h2>
+                    <div class="preview-controls">
+                        <div class="control-group">
+                            <button class="preview-btn active" data-theme="light" aria-label="Light theme preview">☀️ Light</button>
+                            <button class="preview-btn" data-theme="dark" aria-label="Dark theme preview">🌙 Dark</button>
+                        </div>
+                        <div class="control-group">
+                            <button class="preview-btn active" data-view="web" aria-label="Web view preview">💻 Desktop</button>
+                            <button class="preview-btn" data-view="mobile" aria-label="Mobile view preview">📱 Mobile</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="output-container">
+                    <div class="output-preview linkedin-light" id="linkedinPreview" role="region" aria-label="LinkedIn preview">
+                        <p class="preview-placeholder">Your LinkedIn-optimized content will appear here...</p>
+                    </div>
+                </div>
+                
+                <div class="output-footer">
+                    <button class="copy-btn" id="copyBtn">📋 Copy for LinkedIn</button>
+                    <div class="section-note">
+                        🎯 This shows exactly how your post will look on LinkedIn. Copy and paste directly!
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Features Section -->
+        <section class="features" id="features">
+            <div class="features-intro">
+                <h2>🌟 Why Choose LinkedInify</h2>
+                <p class="features-subtitle">
+                    From students to CEOs, bloggers to developers - LinkedInify works for everyone. Simple for beginners, powerful for pros.
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">🌍</span>
+                    <h3 class="feature-title">Universal Content Support</h3>
+                    <p class="feature-desc">Perfect for any topic, any language, any skill level. Business tips, personal stories, tutorials, announcements - it all works!</p>
+                    <ul class="feature-list">
+                        <li>All languages supported</li>
+                        <li>Any content type</li>
+                        <li>Beginner-friendly</li>
+                        <li>Advanced features for power users</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🔒</span>
+                    <h3 class="feature-title">Truly Private & Offline</h3>
+                    <p class="feature-desc">Your content never leaves your device. Works without internet after first load. No accounts, no tracking, no compromises.</p>
+                    <ul class="feature-list">
+                        <li>Install as mobile/desktop app</li>
+                        <li>Works completely offline</li>
+                        <li>No data collection</li>
+                        <li>No accounts required</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🧠</span>
+                    <h3 class="feature-title">Smart AI-Powered Features</h3>
+                    <p class="feature-desc">Intelligent title generation that understands your content in any language. From travel blogs to tech tutorials.</p>
+                    <ul class="feature-list">
+                        <li>Smart titles in 100+ languages</li>
+                        <li>Content type detection</li>
+                        <li>Auto-save with history</li>
+                        <li>Real-time LinkedIn preview</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">⚡</span>
+                    <h3 class="feature-title">Lightning Fast & Easy</h3>
+                    <p class="feature-desc">Simple toolbar for beginners, keyboard shortcuts for pros. Works instantly on any device, any time.</p>
+                    <ul class="feature-list">
+                        <li>One-click formatting buttons</li>
+                        <li>Keyboard shortcuts</li>
+                        <li>Instant preview updates</li>
+                        <li>Mobile-optimized interface</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">📱</span>
+                    <h3 class="feature-title">Perfect LinkedIn Integration</h3>
+                    <p class="feature-desc">See exactly how your post looks on LinkedIn desktop and mobile, light and dark mode. Copy-paste perfection guaranteed.</p>
+                    <ul class="feature-list">
+                        <li>Accurate LinkedIn preview</li>
+                        <li>Desktop & Mobile simulation</li>
+                        <li>Light & Dark mode support</li>
+                        <li>Perfect formatting every time</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">💎</span>
+                    <h3 class="feature-title">Forever Free & Open</h3>
+                    <p class="feature-desc">No subscriptions, no limits, no catches. Built by the community, for the community. Always free, always improving.</p>
+                    <ul class="feature-list">
+                        <li>100% free forever</li>
+                        <li>No usage limits</li>
+                        <li>Open source & transparent</li>
+                        <li>Community-driven development</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-main">
+                    <h3>Created with ❤️ by Ankur Mursalin</h3>
+                    <p>Making Markdown accessible for everyone on LinkedIn</p>
+                </div>
+                
+                <div class="footer-links">
+                    <a href="https://github.com/ankurmursalin/linkedinify" class="footer-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository">
+                        🐙 GitHub
+                    </a>
+                    <a href="https://linkedin.com/in/ankurmursalin" class="footer-link" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Profile">
+                        💼 LinkedIn
+                    </a>
+                    <a href="https://twitter.com/ankurmursalin" class="footer-link" target="_blank" rel="noopener noreferrer" aria-label="Twitter Profile">
+                        🐦 Twitter
+                    </a>
+                    <a href="mailto:ankur@linkedinify.app" class="footer-link" aria-label="Email Contact">
+                        📧 Contact
+                    </a>
+                </div>
+                
+                <div class="footer-bottom">
+                    <p>© 2024 LinkedInify. Licensed under MIT. Built with modern web technologies.</p>
+                    <p>Privacy-first • No tracking • Works offline • Open source</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- History Sidebar -->
+    <aside class="history-sidebar" id="historySidebar" aria-hidden="true">
+        <div class="history-header">
+            <h3>📚 Post History</h3>
+            <button class="close-btn" id="closeHistoryBtn" aria-label="Close history">
+                &times;
+            </button>
+        </div>
+        <div class="history-content" id="historyContent">
+            <p class="history-placeholder">Your saved posts will appear here...</p>
+        </div>
+    </aside>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div class="modal" id="shortcutsModal" aria-hidden="true" role="dialog" aria-labelledby="shortcutsTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="shortcutsTitle">⌨️ Keyboard Shortcuts</h3>
+                <button class="modal-close" aria-label="Close shortcuts">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="shortcuts-grid">
+                    <div class="shortcut-item">
+                        <kbd>Ctrl</kbd> + <kbd>B</kbd>
+                        <span>Bold text</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>Ctrl</kbd> + <kbd>I</kbd>
+                        <span>Italic text</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>Ctrl</kbd> + <kbd>S</kbd>
+                        <span>Save post</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>Ctrl</kbd> + <kbd>Enter</kbd>
+                        <span>Convert markdown</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/app.js"></script>
+    
+    <!-- Inline Critical Scripts -->
+    <script>
+        // Remove loading screen when app is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Hide loading screen after a minimum display time
+            setTimeout(() => {
+                const loadingScreen = document.getElementById('loading-screen');
+                if (loadingScreen) {
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 300);
+                }
+            }, 1000);
+        });
+
+        // Handle critical errors during loading
+        window.addEventListener('error', (event) => {
+            const errorContainer = document.getElementById('error-container');
+            const loadingScreen = document.getElementById('loading-screen');
+            
+            if (errorContainer && event.error) {
+                loadingScreen.style.display = 'none';
+                errorContainer.style.display = 'flex';
+                errorContainer.innerHTML = `
+                    <div class="critical-error">
+                        <h2>🚨 Application Error</h2>
+                        <p>LinkedInify encountered an error and cannot start properly.</p>
+                        <button onclick="window.location.reload()" class="error-reload-btn">
+                            Reload Application
+                        </button>
+                    </div>
+                `;
+            }
+        });
+
+        // Basic performance monitoring
+        if ('performance' in window) {
+            window.addEventListener('load', () => {
+                const loadTime = performance.now();
+                console.log(`LinkedInify loaded in ${loadTime.toFixed(2)}ms`);
+            });
+        }
+    </script>
+</body>
+</html>

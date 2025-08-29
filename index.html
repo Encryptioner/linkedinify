@@ -1279,4 +1279,544 @@ Perfect for ANY topic - business, personal stories, tutorials, announcements, or
                 
                 <div class="social-links">
                     <a href="#" class="social-link" title="LinkedIn">💼</a>
-                    <a href="#" class="social-link" title="Twitter
+                    <a href="#" class="social-link" title="Twitter">🐦</a>
+                    <a href="#" class="social-link" title="GitHub">🐙</a>
+                </div>
+                
+                <div class="copyright">
+                    © 2024 LinkedInify. Licensed under MIT.
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- History Sidebar -->
+    <div class="history-sidebar" id="historySidebar">
+        <div class="history-header">
+            <h3>📚 Post History</h3>
+            <button class="close-btn" onclick="toggleHistory()">&times;</button>
+        </div>
+        <div class="history-content" id="historyContent">
+            <p class="note">Your saved posts will appear here...</p>
+        </div>
+    </div>
+
+    <script>
+        // ===============================
+        // CORE APPLICATION LOGIC
+        // ===============================
+        
+        // Initialize marked.js configuration
+        if (typeof marked !== 'undefined') {
+            marked.setOptions({
+                breaks: true,
+                gfm: true,
+                sanitize: false
+            });
+        }
+
+        // ===============================
+        // HISTORY MANAGEMENT MODULE
+        // ===============================
+        const HistoryManager = {
+            getPosts() {
+                const posts = localStorage.getItem(AppConfig.storageKeys.posts);
+                return posts ? JSON.parse(posts) : [];
+            },
+
+            savePost(title, content) {
+                const posts = this.getPosts();
+                const post = {
+                    id: Date.now().toString(),
+                    title: title || this.generateTitle(content),
+                    content: content,
+                    created: new Date().toISOString(),
+                    preview: content.substring(0, 100) + '...'
+                };
+                
+                posts.unshift(post);
+                
+                if (posts.length > AppConfig.maxHistoryItems) {
+                    posts.pop();
+                }
+                
+                localStorage.setItem(AppConfig.storageKeys.posts, JSON.stringify(posts));
+                this.renderHistory();
+                return post.id;
+            },
+
+            loadPost(postId) {
+                const posts = this.getPosts();
+                const post = posts.find(p => p.id === postId);
+                if (post) {
+                    document.getElementById('markdownInput').value = post.content;
+                    convertMarkdown();
+                    AppState.currentPostId = postId;
+                }
+            },
+
+            deletePost(postId) {
+                const posts = this.getPosts();
+                const filtered = posts.filter(p => p.id !== postId);
+                localStorage.setItem(AppConfig.storageKeys.posts, JSON.stringify(filtered));
+                this.renderHistory();
+            },
+
+            generateTitle(content) {
+                const lines = content.split('\n').filter(line => line.trim());
+                if (lines.length === 0) return 'Untitled Post';
+                
+                const firstLine = lines[0].trim();
+                if (firstLine.startsWith('#')) {
+                    return firstLine.replace(/^#+\s*/, '').substring(0, 50);
+                }
+                
+                return TitleGenerator.generateTitle(content);
+            },
+
+            renderHistory() {
+                const posts = this.getPosts();
+                const container = document.getElementById('historyContent');
+                
+                if (posts.length === 0) {
+                    container.innerHTML = '<p class="note">No saved posts yet. Create your first post!</p>';
+                    return;
+                }
+
+                container.innerHTML = posts.map(post => 
+                    '<div class="history-item ' + (AppState.currentPostId === post.id ? 'active' : '') + '" onclick="HistoryManager.loadPost(\'' + post.id + '\')">' +
+                        '<div class="history-item-title">' +
+                            post.title +
+                            '<div class="history-actions">' +
+                                '<button class="history-action-btn" onclick="event.stopPropagation(); HistoryManager.deletePost(\'' + post.id + '\')" title="Delete">🗑️</button>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="history-item-preview">' + post.preview + '</div>' +
+                        '<div class="history-item-date">' + new Date(post.created).toLocaleDateString() + '</div>' +
+                    '</div>'
+                ).join('');
+            }
+        };
+
+        // ===============================
+        // CONTENT CONVERTER MODULE
+        // ===============================
+        const ContentConverter = {
+            markdownToLinkedIn(markdown) {
+                if (!markdown.trim()) return '';
+
+                let converted = markdown;
+
+                // Convert headers
+                converted = converted.replace(/^### (.*$)/gm, '$1');
+                converted = converted.replace(/^## (.*$)/gm, '$1');
+                converted = converted.replace(/^# (.*$)/gm, '$1');
+
+                // Convert bold and italic
+                converted = converted.replace(/\*\*\*(.*?)\*\*\*/g, '***$1***');
+                converted = converted.replace(/\*\*(.*?)\*\*/g, '**$1**');
+                converted = converted.replace(/(?<!\*)\*(?!\*)([^*]+)(?<!\*)\*(?!\*)/g, '*$1*');
+
+                // Convert code blocks to readable format
+                converted = converted.replace(/```(\w+)?\n([\s\S]*?)\n```/g, function(match, lang, code) {
+                    return '\n' + code.trim() + '\n';
+                });
+
+                // Convert inline code
+                converted = converted.replace(/`([^`]+)`/g, '$1');
+
+                // Convert blockquotes
+                converted = converted.replace(/^> (.*$)/gm, '💭 $1');
+
+                // Convert unordered lists
+                converted = converted.replace(/^[\s]*[-*+] (.*$)/gm, '• $1');
+
+                // Convert ordered lists
+                converted = converted.replace(/^[\s]*\d+\. (.*$)/gm, function(match, content, offset, string) {
+                    var lines = string.substring(0, offset).split('\n');
+                    var currentLineIndex = lines.length - 1;
+                    var number = 1;
+                    
+                    for (var i = currentLineIndex - 1; i >= 0; i--) {
+                        if (lines[i].match(/^[\s]*\d+\. /)) {
+                            number++;
+                        } else if (lines[i].trim() === '') {
+                            continue;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    return number + '. ' + content;
+                });
+
+                // Convert links
+                converted = converted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1 ($2)');
+
+                // Clean up extra whitespace while preserving intentional spacing
+                converted = converted.replace(/\n{3,}/g, '\n\n');
+
+                return converted.trim();
+            }
+        };
+
+        // ===============================
+        // UI EVENT HANDLERS
+        // ===============================
+        function toggleTheme() {
+            ThemeManager.toggle();
+        }
+
+        function toggleHistory() {
+            const sidebar = document.getElementById('historySidebar');
+            const isOpen = sidebar.classList.contains('open');
+            
+            if (isOpen) {
+                sidebar.classList.remove('open');
+            } else {
+                sidebar.classList.add('open');
+                HistoryManager.renderHistory();
+            }
+        }
+
+        function setLinkedInTheme(theme) {
+            PreviewManager.setLinkedInTheme(theme);
+        }
+
+        function setLinkedInView(view) {
+            PreviewManager.setLinkedInView(view);
+        }
+
+        function formatText(prefix, suffix) {
+            const textarea = document.getElementById('markdownInput');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            const replacement = prefix + selectedText + suffix;
+            
+            textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+            textarea.focus();
+            textarea.setSelectionRange(start + prefix.length, start + prefix.length + selectedText.length);
+            
+            convertMarkdown();
+        }
+
+        function formatHeading(level) {
+            const prefix = '#'.repeat(level) + ' ';
+            const textarea = document.getElementById('markdownInput');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            
+            const replacement = prefix + selectedText;
+            textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+            textarea.focus();
+            textarea.setSelectionRange(start + prefix.length, start + prefix.length + selectedText.length);
+            
+            convertMarkdown();
+        }
+
+        function formatList(prefix) {
+            const textarea = document.getElementById('markdownInput');
+            const start = textarea.selectionStart;
+            const lines = textarea.value.split('\n');
+            let currentLine = 0;
+            let charCount = 0;
+            
+            for (let i = 0; i < lines.length; i++) {
+                if (charCount + lines[i].length >= start) {
+                    currentLine = i;
+                    break;
+                }
+                charCount += lines[i].length + 1;
+            }
+            
+            lines[currentLine] = prefix + lines[currentLine];
+            textarea.value = lines.join('\n');
+            textarea.focus();
+            
+            convertMarkdown();
+        }
+
+        function insertCodeBlock() {
+            const textarea = document.getElementById('markdownInput');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            const replacement = '```\n' + selectedText + '\n```';
+            
+            textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+            textarea.focus();
+            textarea.setSelectionRange(start + 4, start + 4 + selectedText.length);
+            
+            convertMarkdown();
+        }
+
+        function insertLink() {
+            const textarea = document.getElementById('markdownInput');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            const replacement = '[' + (selectedText || 'link text') + '](https://example.com)';
+            
+            textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+            textarea.focus();
+            
+            if (!selectedText) {
+                textarea.setSelectionRange(start + 1, start + 10);
+            }
+            
+            convertMarkdown();
+        }
+
+        function loadExample() {
+            const example = `# 🚀 5 Game-Changing LinkedIn Tips for 2024
+
+## Why Your Profile Matters More Than Ever
+
+Your LinkedIn profile is your **digital business card** and *professional story* combined.
+
+Here's what successful professionals do differently:
+
+- Optimize headlines with keywords
+- Share valuable industry insights 
+- Engage meaningfully with connections
+- Post consistently (3-4 times per week)
+
+> "Your network is your net worth" - Porter Gale
+
+### Pro Tip: Use Data
+
+\`\`\`javascript
+const engagement = posts.filter(post => 
+    post.likes > 100 && post.comments > 10
+);
+\`\`\`
+
+**Ready to level up your LinkedIn game?**
+
+What's your biggest LinkedIn challenge? Drop it in the comments! 👇
+
+#LinkedIn #Professional #Networking #Career`;
+
+            document.getElementById('markdownInput').value = example;
+            convertMarkdown();
+        }
+
+        function convertMarkdown() {
+            const markdown = document.getElementById('markdownInput').value;
+            const htmlPreview = document.getElementById('htmlPreview');
+            const linkedinPreview = document.getElementById('linkedinPreview');
+            
+            if (typeof marked !== 'undefined') {
+                htmlPreview.innerHTML = marked.parse(markdown);
+            } else {
+                htmlPreview.innerHTML = '<p style="color: red;">Marked.js library not loaded. Please refresh the page.</p>';
+            }
+            
+            const linkedinText = ContentConverter.markdownToLinkedIn(markdown);
+            linkedinPreview.textContent = linkedinText;
+            
+            autoSave();
+        }
+
+        function saveCurrentPost() {
+            const content = document.getElementById('markdownInput').value.trim();
+            if (!content) {
+                showStatus('Please write some content first!', 'error');
+                return;
+            }
+            
+            const postId = HistoryManager.savePost('', content);
+            AppState.currentPostId = postId;
+            showStatus('Post saved successfully!', 'success');
+        }
+
+        function copyToClipboard() {
+            const content = document.getElementById('linkedinPreview').textContent;
+            
+            if (!content.trim()) {
+                showStatus('Please convert some content first!', 'error');
+                return;
+            }
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(content).then(() => {
+                    showCopySuccess();
+                }).catch(() => {
+                    fallbackCopy(content);
+                });
+            } else {
+                fallbackCopy(content);
+            }
+        }
+
+        function fallbackCopy(content) {
+            const textarea = document.createElement('textarea');
+            textarea.value = content;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-999999px';
+            textarea.style.top = '-999999px';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                showCopySuccess();
+            } catch (err) {
+                showStatus('Copy failed. Please select and copy manually.', 'error');
+            }
+            
+            document.body.removeChild(textarea);
+        }
+
+        function showCopySuccess() {
+            const btn = document.getElementById('copyBtn');
+            const originalText = btn.textContent;
+            
+            btn.textContent = '✅ Copied!';
+            btn.classList.add('copied');
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.remove('copied');
+            }, 2000);
+            
+            showStatus('Copied to clipboard! Ready to paste on LinkedIn.', 'success');
+        }
+
+        function showStatus(message, type = 'success') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 4000);
+        }
+
+        // ===============================
+        // AUTO-SAVE FUNCTIONALITY
+        // ===============================
+        let autoSaveTimeout;
+        
+        function autoSave() {
+            if (AppState.isAutoSaving) return;
+            
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                const content = document.getElementById('markdownInput').value.trim();
+                if (content) {
+                    AppState.isAutoSaving = true;
+                    localStorage.setItem('linkedinify_draft', content);
+                    AppState.isAutoSaving = false;
+                }
+            }, AppConfig.autoSaveDelay);
+        }
+
+        function loadDraft() {
+            const draft = localStorage.getItem('linkedinify_draft');
+            if (draft && !document.getElementById('markdownInput').value.trim()) {
+                document.getElementById('markdownInput').value = draft;
+                convertMarkdown();
+            }
+        }
+
+        // ===============================
+        // KEYBOARD SHORTCUTS
+        // ===============================
+        document.addEventListener('keydown', function(e) {
+            if (e.target.id !== 'markdownInput') return;
+            
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'b':
+                        e.preventDefault();
+                        formatText('**', '**');
+                        break;
+                    case 'i':
+                        e.preventDefault();
+                        formatText('*', '*');
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        saveCurrentPost();
+                        break;
+                }
+            }
+        });
+
+        // ===============================
+        // INPUT EVENT LISTENERS
+        // ===============================
+        document.getElementById('markdownInput').addEventListener('input', function() {
+            convertMarkdown();
+        });
+
+        // ===============================
+        // APP INITIALIZATION
+        // ===============================
+        document.addEventListener('DOMContentLoaded', function() {
+            ThemeManager.init();
+            PreviewManager.setLinkedInTheme('light');
+            PreviewManager.setLinkedInView('web');
+            loadDraft();
+            
+            // Initialize with empty state
+            convertMarkdown();
+        });
+
+        // Update the TitleGenerator patterns section to be more comprehensive
+        TitleGenerator.patterns = {
+            ...TitleGenerator.patterns,
+            // Additional patterns for better title generation
+            personal: {
+                keywords: ['story', 'journey', 'experience', 'life', 'personal', 'motivation', 'inspiration', 'challenge', 'growth', 'reflection', 'milestone', 'achievement', 'lesson', 'advice'],
+                emojis: ['🌟', '💪', '🚀', '✨', '💡', '🎯', '🌈', '💫'],
+                templates: ['Personal Story', 'Life Lesson', 'Journey Update', 'Milestone Moment', 'Personal Reflection', 'Growth Story', 'Life Update', 'Personal Achievement']
+            },
+            social: {
+                keywords: ['community', 'networking', 'connection', 'relationship', 'social', 'collaboration', 'teamwork', 'partnership', 'mentorship', 'leadership', 'influence', 'communication', 'engagement'],
+                emojis: ['🤝', '💼', '👥', '🌐', '🔗', '💬', '👋', '🎉'],
+                templates: ['Community Update', 'Networking Tips', 'Collaboration Story', 'Team Success', 'Leadership Insight', 'Community Building', 'Social Impact', 'Partnership Update']
+            }
+        };
+
+        // Enhanced title generation
+        TitleGenerator.generateTitle = function(content) {
+            if (!content || content.trim().length === 0) {
+                return 'New LinkedIn Post';
+            }
+            
+            const words = content.toLowerCase().split(/\s+/);
+            const categories = Object.keys(this.patterns);
+            let bestMatch = { category: 'business', score: 0 };
+            
+            categories.forEach(category => {
+                const pattern = this.patterns[category];
+                let score = 0;
+                
+                pattern.keywords.forEach(keyword => {
+                    words.forEach(word => {
+                        if (word.includes(keyword) || keyword.includes(word)) {
+                            score++;
+                        }
+                    });
+                });
+                
+                if (score > bestMatch.score) {
+                    bestMatch = { category, score };
+                }
+            });
+            
+            const pattern = this.patterns[bestMatch.category];
+            const randomEmoji = pattern.emojis[Math.floor(Math.random() * pattern.emojis.length)];
+            const randomTemplate = pattern.templates[Math.floor(Math.random() * pattern.templates.length)];
+            
+            return `${randomEmoji} ${randomTemplate}`;
+        };
+    </script>
+</body>
+</html>
