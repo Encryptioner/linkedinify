@@ -1,0 +1,49 @@
+{
+  "name": "linkedinify",
+  "version": "1.2.0",
+  "description": "Convert Markdown to LinkedIn posts offline. Private, fast, and works for everyone!",
+  "main": "index.html",
+  "scripts": {
+    "start": "http-server -p 8000 -c-1",
+    "dev": "http-server -p 8000 -c-1",
+    "build": "echo 'No build step required - pure vanilla JS!'",
+    "test": "echo 'Tests coming soon!'",
+    "serve": "python -m http.server 8000"
+  },
+  "keywords": [
+    "markdown",
+    "linkedin",
+    "converter",
+    "pwa",
+    "offline",
+    "social-media",
+    "productivity",
+    "privacy-first"
+  ],
+  "author": {
+    "name": "Ankur Mursalin",
+    "email": "ankur@example.com",
+    "url": "https://github.com/ankurmursalin"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ankurmursalin/linkedinify.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ankurmursalin/linkedinify/issues"
+  },
+  "homepage": "https://linkedinify.app",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "Chrome >= 80",
+    "Firefox >= 75",
+    "Safari >= 13",
+    "Edge >= 80"
+  ]
+}
