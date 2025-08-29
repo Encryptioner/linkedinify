@@ -44,14 +44,14 @@ git clone https://github.com/ankurmursalin/linkedinify.git
 cd linkedinify
 
 # Install dependencies
-npm install
+pnpm install
 
 # Start development server
-npm run dev
+pnpm run dev
 
 # Or build for production
-npm run build
-npm run preview
+pnpm run build
+pnpm run preview
 ```
 
 ### Option 3: Simple HTTP Server
@@ -105,56 +105,56 @@ linkedinify/
 ## 🛠️ Development
 
 ### Prerequisites
-- Node.js 16+ and npm 8+
+- Node.js 16+ and pnpm 8+
 - Modern browser with ES6+ support
 
 ### Setup Development Environment
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Start development server
-npm run dev
+pnpm run dev
 
 # Run tests
-npm test
+pnpm test
 
 # Run tests with UI
-npm run test:ui
+pnpm run test:ui
 
 # Check code quality
-npm run lint
-npm run format
+pnpm run lint
+pnpm run format
 
 # Build for production
-npm run build
+pnpm run build
 ```
 
 ### Testing
 ```bash
 # Run all tests
-npm test
+pnpm test
 
 # Run with coverage
-npm run test:coverage
+pnpm run test:coverage
 
 # Run specific test
-npm test -- theme-manager
+pnpm test -- theme-manager
 
 # Run tests in watch mode
-npm test -- --watch
+pnpm test -- --watch
 ```
 
 ### Code Quality
 ```bash
 # Lint and fix
-npm run lint
+pnpm run lint
 
 # Format code
-npm run format
+pnpm run format
 
 # Full check (lint + test + build)
-npm run check
+pnpm run check
 ```
 
 ## 📱 PWA Installation
@@ -234,18 +234,36 @@ const { name, email, age } = user;
 ## 🚀 Deployment
 
 ### GitHub Pages (Automatic)
-1. Fork this repository
-2. Enable GitHub Actions in your fork
-3. Push to `main` branch
-4. Your app will be live at `https://yourusername.github.io/linkedinify`
+1. **Fork this repository** to your GitHub account
+2. **Enable GitHub Actions** in your fork:
+   - Go to Settings → Actions → General
+   - Select "Allow all actions and reusable workflows"
+3. **Enable GitHub Pages**:
+   - Go to Settings → Pages
+   - Source: "GitHub Actions"
+4. **Push to `main` branch** and the workflow will automatically:
+   - Install dependencies with pnpm
+   - Run tests to ensure code quality
+   - Build the production version
+   - Deploy to GitHub Pages
+5. **Your app will be live** at `https://yourusername.github.io/linkedinify`
+
+### GitHub Pages Setup Guide
+The repository includes a complete GitHub Actions workflow (`.github/workflows/deploy.yml`) that:
+
+- ✅ Uses pnpm for fast, reliable builds
+- ✅ Runs full test suite before deployment  
+- ✅ Builds optimized production bundle
+- ✅ Deploys automatically on every push to main
+- ✅ Supports custom domains (configure in workflow)
 
 ### Manual Deployment
 ```bash
 # Build the project
-npm run build
+pnpm run build
 
 # Deploy to GitHub Pages
-npm run deploy
+pnpm run deploy
 
 # Or upload dist/ folder to any static hosting
 ```
@@ -266,7 +284,7 @@ We welcome contributions! Here's how:
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes
 4. Add tests for new functionality
-5. Run the full check: `npm run check`
+5. Run the full check: `pnpm run check`
 6. Commit your changes (`git commit -m 'Add amazing feature'`)
 7. Push to the branch (`git push origin feature/amazing-feature`)
 8. Open a Pull Request

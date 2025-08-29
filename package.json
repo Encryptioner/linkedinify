@@ -4,6 +4,7 @@
   "description": "Convert Markdown to LinkedIn posts offline. Privacy-first, AI-powered, and works everywhere.",
   "main": "src/js/app.js",
   "type": "module",
+  "packageManager": "pnpm@8.15.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -14,9 +15,9 @@
     "lint": "eslint src --ext .js,.ts --fix",
     "format": "prettier --write \"src/**/*.{js,ts,html,css,md}\"",
     "serve": "http-server dist -p 8080 -c-1",
-    "deploy": "npm run build && gh-pages -d dist",
+    "deploy": "pnpm run build && gh-pages -d dist",
     "prepare": "husky install",
-    "check": "npm run lint && npm run test && npm run build"
+    "check": "pnpm run lint && pnpm run test && pnpm run build"
   },
   "keywords": [
     "markdown",
@@ -69,7 +70,7 @@
   },
   "engines": {
     "node": ">=16.0.0",
-    "npm": ">=8.0.0"
+    "pnpm": ">=8.0.0"
   },
   "browserslist": [
     "> 1%",

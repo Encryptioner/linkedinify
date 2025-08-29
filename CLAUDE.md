@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-LinkedInify is a Progressive Web App (PWA) that converts Markdown content to LinkedIn-ready posts. It's a client-side application built with vanilla HTML, CSS, and JavaScript that works completely offline after the initial load.
+LinkedInify is a Progressive Web App (PWA) that converts Markdown content to LinkedIn-ready posts. It's built with modern modular JavaScript architecture using Vite for development and build processes, with pnpm as the package manager.
 
 **Key Features:**
 - 100% offline functionality with service worker caching
@@ -19,80 +19,111 @@ LinkedInify is a Progressive Web App (PWA) that converts Markdown content to Lin
 
 ### Local Development
 ```bash
-# Start development server (Python - recommended)
-python -m http.server 8000
+# Install dependencies
+pnpm install
 
-# Start development server (Node.js)
-npm start
-# or
-npm run dev
+# Start development server (recommended)
+pnpm run dev
 
-# Generate app icons
-python icon-generator.py
+# Run tests
+pnpm test
 
-# Serve via PHP
-php -S localhost:8000
+# Build for production
+pnpm run build
+
+# Preview production build
+pnpm run preview
 ```
 
 ### Build & Deploy
 ```bash
-# No build step required - pure vanilla JS
-npm run build  # outputs: "No build step required - pure vanilla JS!"
+# Build for production
+pnpm run build
 
-# Deploy to static hosting (Netlify, Vercel, GitHub Pages)
-# Simply upload all files to hosting provider
+# Deploy to GitHub Pages
+pnpm run deploy
+
+# Or upload dist/ folder to any static hosting
 ```
 
 ## Architecture & Structure
 
-### Single-File Application
-The entire application is contained in `index.html` which includes:
-- **HTML structure** - App layout and components
-- **CSS styles** - Responsive design with light/dark themes
-- **JavaScript modules** - Modular component system
+### Modular Architecture
+The application uses a modern modular JavaScript architecture with separate files for each concern:
+- **HTML structure** - App layout in `src/index.html`
+- **CSS styles** - Responsive design in `src/css/styles.css`
+- **JavaScript modules** - ES6 modules in `src/js/modules/`
+- **Utilities** - Shared utilities in `src/js/utils/`
+- **Configuration** - App config in `src/js/config/`
+- **Tests** - Comprehensive test suite in `src/test/`
 
-### Key JavaScript Modules (all in index.html)
-- **AppConfig & AppState** - Global configuration and state management
-- **ThemeManager** - Light/dark mode switching
+### Key JavaScript Modules
+- **ThemeManager** - Light/dark mode switching with system preference detection
 - **PreviewManager** - LinkedIn preview modes (light/dark, desktop/mobile)
 - **TitleGenerator** - AI-powered title generation with multi-language patterns
-- **HistoryManager** - Local storage for post history
-- **MarkdownConverter** - Markdown to LinkedIn text conversion
-- **PWA Registration** - Service worker management
+- **HistoryManager** - Local storage and post management with auto-save
+- **ContentConverter** - Markdown to LinkedIn text conversion
+- **ClipboardManager** - Advanced clipboard functionality with fallbacks
+- **KeyboardManager** - Keyboard shortcuts and accessibility
+- **UIManager** - General UI interactions and status management
+- **ServiceWorkerManager** - PWA offline functionality and updates
 
 ### File Structure
 ```
 linkedinify/
-├── index.html           # Main application (HTML + CSS + JS)
-├── service-worker.js    # PWA offline functionality
-├── manifest-json.json   # PWA manifest configuration  
-├── package-json.json    # Node.js package configuration
-├── readme-file.md       # Project documentation
-├── setup-guide.md       # Deployment and setup instructions
-├── icon-generator.py    # Python script to generate PWA icons
-├── deploy-script.sh     # Deployment automation script
-└── license-file.txt     # MIT license
+├── src/
+│   ├── index.html          # Main application HTML
+│   ├── css/
+│   │   └── styles.css      # Modern CSS with custom properties
+│   ├── js/
+│   │   ├── app.js          # Main application entry point
+│   │   ├── config/
+│   │   │   └── app-config.js    # Application configuration
+│   │   ├── modules/        # Feature modules
+│   │   │   ├── theme-manager.js
+│   │   │   ├── preview-manager.js
+│   │   │   ├── history-manager.js
+│   │   │   ├── content-converter.js
+│   │   │   ├── title-generator.js
+│   │   │   ├── clipboard-manager.js
+│   │   │   ├── keyboard-manager.js
+│   │   │   ├── ui-manager.js
+│   │   │   └── service-worker-manager.js
+│   │   └── utils/          # Shared utilities
+│   │       ├── event-emitter.js
+│   │       └── logger.js
+│   └── test/               # Test files
+├── public/                 # Static assets (generated)
+├── dist/                   # Build output
+├── package.json           # pnpm package configuration
+├── vite.config.js         # Vite build configuration
+├── README.md              # Project documentation
+└── CLAUDE.md              # Claude Code guidance
 ```
 
 ### State Management
 - Uses vanilla JavaScript with localStorage for persistence
+- Event-driven architecture with custom EventEmitter base class
+- Each module extends EventEmitter for inter-module communication
 - Key storage keys defined in `AppConfig.storageKeys`:
   - `linkedinify_theme` - User's theme preference
   - `linkedinify_posts` - Saved post history
   - `linkedinify_settings` - App settings
+  - `linkedinify_drafts` - Auto-saved drafts
 
 ### Service Worker Strategy
 - **Cache-first strategy** for offline functionality
-- Caches all static assets and external dependencies (marked.js)
-- Handles offline fallbacks and background sync preparation
-- Version-based cache management (`linkedinify-v1.2`)
+- Caches all static assets and external dependencies
+- Handles offline fallbacks and background sync
+- Version-based cache management with automatic updates
+- Service worker manager handles registration, updates, and cleanup
 
 ## Common Development Tasks
 
 ### Adding New Content Patterns
 To add new AI title generation patterns:
 ```javascript
-// Add to TitleGenerator.patterns in index.html
+// Edit src/js/modules/title-generator.js
 TitleGenerator.patterns.newCategory = {
     keywords: ['keyword1', 'keyword2'],
     emojis: ['🎯', '💡'],
@@ -101,20 +132,39 @@ TitleGenerator.patterns.newCategory = {
 ```
 
 ### Adding New Themes  
-```javascript
-// Modify CSS variables in :root and [data-theme="dark"] sections
-// Update ThemeManager.applyTheme() method if needed
+```css
+/* Edit src/css/styles.css */
+/* Add new CSS custom properties in :root and [data-theme="theme-name"] */
+:root {
+  --new-theme-color: #ffffff;
+}
+
+[data-theme="new-theme"] {
+  --background-primary: #custom-color;
+}
 ```
 
-### Updating PWA Configuration
-- Update version in `service-worker.js` CACHE_NAME
-- Modify `manifest-json.json` for PWA settings
-- Update `package-json.json` for Node.js metadata
+### Creating New Modules
+```javascript
+// Create new file in src/js/modules/
+import { EventEmitter } from '../utils/event-emitter.js';
+import { Logger } from '../utils/logger.js';
 
-### Adding Toolbar Buttons
-```html
-<!-- Add to toolbar section in index.html -->
-<button class="toolbar-btn" onclick="yourFunction()" title="Description">Label</button>
+export class NewModule extends EventEmitter {
+  constructor({ app }) {
+    super();
+    this.app = app;
+    this.logger = new Logger('NewModule');
+  }
+
+  async init() {
+    this.logger.debug('Initializing new module');
+  }
+
+  cleanup() {
+    this.removeAllListeners();
+  }
+}
 ```
 
 ### Testing PWA Functionality
@@ -125,9 +175,16 @@ TitleGenerator.patterns.newCategory = {
 
 ## Dependencies
 
-### External Dependencies
-- **marked.js v5.1.2** - Markdown parsing (loaded from CDN)
-- **http-server** - Development server (Node.js devDependency)
+### Runtime Dependencies
+- **marked** - Markdown parsing library
+- **@vite/plugin-pwa** - PWA functionality for Vite
+
+### Development Dependencies
+- **vite** - Build tool and dev server
+- **vitest** - Testing framework
+- **@vitest/ui** - Testing UI
+- **eslint** - Code linting
+- **prettier** - Code formatting
 
 ### Browser Requirements
 - Chrome 80+ / Firefox 75+ / Safari 13+ / Edge 80+
@@ -143,6 +200,13 @@ TitleGenerator.patterns.newCategory = {
 ## Deployment Notes
 - Static hosting compatible (Netlify, Vercel, GitHub Pages, Firebase)
 - Requires HTTPS for full PWA functionality
-- All assets must be uploaded (no build step required)
+- Build assets using `pnpm run build` and upload `dist/` folder
 - Service worker requires proper MIME types configured on server
-- Icons should be generated using `icon-generator.py` before deployment
+- PWA icons and manifest are automatically generated during build
+- GitHub Pages deployment is automated via GitHub Actions
+
+### Manual Deployment Steps
+1. Run `pnpm run build` to generate production assets
+2. Upload contents of `dist/` folder to your hosting provider
+3. Ensure HTTPS is enabled for PWA functionality
+4. Configure server to serve service worker with correct MIME type
