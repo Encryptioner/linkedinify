@@ -30,8 +30,12 @@
     <meta name="msapplication-TileColor" content="#0077b5">
     
     <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/linkedinify/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="/linkedinify/icons/icon-32x32.png">
     <link rel="apple-touch-icon" href="/linkedinify/icons/icon-192x192.png">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/linkedinify/manifest.json">
     
     <!-- Styles -->
     <link rel="stylesheet" href="css/styles.css">
@@ -68,9 +72,6 @@
                         <span class="version">v2.0</span>
                     </div>
                     <div class="header-controls">
-                        <button class="theme-toggle" id="themeToggle" aria-label="Switch theme">
-                            🌙 Dark Mode
-                        </button>
                         <button class="history-toggle" id="historyToggle" aria-label="Toggle history">
                             📚 History
                         </button>
@@ -84,7 +85,6 @@
                 <div class="feature-badges">
                     <div class="badge highlight">🔒 100% Private & Offline</div>
                     <div class="badge">🌍 All Languages</div>
-                    <div class="badge">📱 Mobile App</div>
                     <div class="badge highlight">🧠 AI-Powered Titles</div>
                     <div class="badge">⚡ Instant Preview</div>
                     <div class="badge highlight">🆓 Forever Free</div>
@@ -206,46 +206,53 @@ Perfect for ANY topic - business, personal stories, tutorials, announcements, or
             <!-- Preview Section -->
             <section class="preview-section">
                 <div class="section-header">
-                    <h2 class="section-title">👀 HTML Preview</h2>
+                    <h2 class="section-title">👀 Preview</h2>
+                    <div class="preview-tabs">
+                        <button class="tab-btn active" data-tab="linkedin" aria-label="LinkedIn preview">📋 LinkedIn Preview</button>
+                        <button class="tab-btn" data-tab="html" aria-label="HTML preview">🌐 HTML Preview</button>
+                    </div>
                 </div>
                 
                 <div class="preview-container">
-                    <div class="preview-area" id="htmlPreview" role="region" aria-label="HTML preview">
-                        <p class="preview-placeholder">Your HTML preview will appear here...</p>
-                    </div>
-                </div>
-                
-                <div class="section-note">
-                    📌 This shows how your content renders with full HTML formatting
-                </div>
-            </section>
-
-            <!-- Output Section -->
-            <section class="output-section">
-                <div class="section-header">
-                    <h2 class="section-title">📋 LinkedIn Ready</h2>
-                    <div class="preview-controls">
-                        <div class="control-group">
-                            <button class="preview-btn active" data-theme="light" aria-label="Light theme preview">☀️ Light</button>
-                            <button class="preview-btn" data-theme="dark" aria-label="Dark theme preview">🌙 Dark</button>
+                    <div class="tab-content active" id="linkedinPreviewTab">
+                        <!-- LinkedIn Display Settings -->
+                        <div class="linkedin-settings">
+                            <div class="settings-header">
+                                <span class="settings-title">LinkedIn Display Settings</span>
+                            </div>
+                            <div class="preview-controls">
+                                <div class="control-group">
+                                    <button class="preview-btn active" data-theme="light" aria-label="Light theme preview">☀️ Light</button>
+                                    <button class="preview-btn" data-theme="dark" aria-label="Dark theme preview">🌙 Dark</button>
+                                </div>
+                                <div class="control-group">
+                                    <button class="preview-btn active" data-view="web" aria-label="Web view preview">💻 Desktop</button>
+                                    <button class="preview-btn" data-view="mobile" aria-label="Mobile view preview">📱 Mobile</button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="control-group">
-                            <button class="preview-btn active" data-view="web" aria-label="Web view preview">💻 Desktop</button>
-                            <button class="preview-btn" data-view="mobile" aria-label="Mobile view preview">📱 Mobile</button>
+                        
+                        <div class="preview-area linkedin-preview" id="linkedinPreview" role="region" aria-label="LinkedIn preview">
+                            <p class="preview-placeholder">Your LinkedIn-ready content will appear here...</p>
+                        </div>
+                        <div class="preview-footer">
+                            <button class="copy-btn" id="copyBtnLinkedIn">📋 Copy for LinkedIn</button>
+                            <div class="section-note">
+                                🎯 This shows exactly how your post will look on LinkedIn. Copy and paste directly!
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="output-container">
-                    <div class="output-preview linkedin-light" id="linkedinPreview" role="region" aria-label="LinkedIn preview">
-                        <p class="preview-placeholder">Your LinkedIn-optimized content will appear here...</p>
-                    </div>
-                </div>
-                
-                <div class="output-footer">
-                    <button class="copy-btn" id="copyBtn">📋 Copy for LinkedIn</button>
-                    <div class="section-note">
-                        🎯 This shows exactly how your post will look on LinkedIn. Copy and paste directly!
+                    
+                    <div class="tab-content" id="htmlPreviewTab">
+                        <div class="preview-area" id="htmlPreview" role="region" aria-label="HTML preview">
+                            <p class="preview-placeholder">Your HTML preview will appear here...</p>
+                        </div>
+                        <div class="preview-footer">
+                            <button class="copy-btn" id="copyBtnHTML">📋 Copy HTML</button>
+                            <div class="section-note">
+                                📌 This shows how your content renders with full HTML formatting
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

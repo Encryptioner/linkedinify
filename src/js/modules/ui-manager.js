@@ -24,6 +24,7 @@ export class UIManager extends EventEmitter {
       this.setupEventListeners();
       this.setupToolbarActions();
       this.setupLoadingStates();
+      this.setupHistoryEventListeners();
       this.logger.info('UI manager initialized');
     } catch (error) {
       this.logger.error('Failed to initialize UI manager:', error);
@@ -63,11 +64,36 @@ export class UIManager extends EventEmitter {
       });
     }
 
-    // Copy button
-    const copyBtn = document.getElementById('copyBtn');
-    if (copyBtn) {
-      copyBtn.addEventListener('click', () => {
-        this.copyToClipboard();
+    // Copy buttons
+    const copyBtnLinkedIn = document.getElementById('copyBtnLinkedIn');
+    if (copyBtnLinkedIn) {
+      copyBtnLinkedIn.addEventListener('click', () => {
+        this.copyLinkedInContent();
+      });
+    }
+
+    const copyBtnHTML = document.getElementById('copyBtnHTML');
+    if (copyBtnHTML) {
+      copyBtnHTML.addEventListener('click', () => {
+        this.copyHTMLContent();
+      });
+    }
+
+    // Tab switching
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.switchTab(btn.dataset.tab);
+      });
+    });
+
+    // Real-time markdown conversion on input
+    const markdownInput = document.getElementById('markdownInput');
+    if (markdownInput) {
+      markdownInput.addEventListener('input', () => {
+        if (this.app.convertMarkdown) {
+          this.app.convertMarkdown();
+        }
       });
     }
   }
@@ -91,15 +117,34 @@ export class UIManager extends EventEmitter {
    */
   async handleToolbarAction(action) {
     try {
+      this.logger.debug(`Handling toolbar action: ${action}`);
+      
+      if (!this.app) {
+        this.logger.error('App instance not available');
+        return;
+      }
+
       switch (action) {
         case 'bold':
-          await this.app.formatText('**', '**');
+          if (typeof this.app.formatText === 'function') {
+            await this.app.formatText('**', '**');
+          } else {
+            this.logger.error('app.formatText is not a function');
+          }
           break;
         case 'italic':
-          await this.app.formatText('*', '*');
+          if (typeof this.app.formatText === 'function') {
+            await this.app.formatText('*', '*');
+          } else {
+            this.logger.error('app.formatText is not a function');
+          }
           break;
         case 'code':
-          await this.app.formatText('`', '`');
+          if (typeof this.app.formatText === 'function') {
+            await this.app.formatText('`', '`');
+          } else {
+            this.logger.error('app.formatText is not a function');
+          }
           break;
         case 'h1':
           await this.formatHeading(1);
@@ -360,6 +405,103 @@ What's your biggest LinkedIn challenge? Drop it in the comments! 👇
   }
 
   /**
+   * Switch between tabs
+   */
+  switchTab(tabName) {
+    // Update tab buttons
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    tabBtns.forEach(btn => {
+      if (btn.dataset.tab === tabName) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    // Update tab content
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(content => {
+      if (content.id === `${tabName}PreviewTab`) {
+        content.classList.add('active');
+      } else {
+        content.classList.remove('active');
+      }
+    });
+
+    this.emit('tabChanged', { tab: tabName });
+  }
+
+  /**
+   * Copy LinkedIn content to clipboard
+   */
+  async copyLinkedInContent() {
+    try {
+      const content = document.getElementById('linkedinPreview')?.textContent;
+      
+      if (!content || !content.trim()) {
+        this.showStatus('Please convert some content first!', 'error');
+        return;
+      }
+
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(content);
+        this.showCopySuccessForButton('copyBtnLinkedIn', 'LinkedIn content');
+      } else {
+        this.fallbackCopy(content);
+      }
+      
+    } catch (error) {
+      this.logger.error('Failed to copy LinkedIn content:', error);
+      this.showStatus('Copy failed. Please try again.', 'error');
+    }
+  }
+
+  /**
+   * Copy HTML content to clipboard
+   */
+  async copyHTMLContent() {
+    try {
+      const content = document.getElementById('htmlPreview')?.innerHTML;
+      
+      if (!content || !content.trim()) {
+        this.showStatus('Please convert some content first!', 'error');
+        return;
+      }
+
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(content);
+        this.showCopySuccessForButton('copyBtnHTML', 'HTML content');
+      } else {
+        this.fallbackCopy(content);
+      }
+      
+    } catch (error) {
+      this.logger.error('Failed to copy HTML content:', error);
+      this.showStatus('Copy failed. Please try again.', 'error');
+    }
+  }
+
+  /**
+   * Show copy success for specific button
+   */
+  showCopySuccessForButton(buttonId, contentType) {
+    const btn = document.getElementById(buttonId);
+    if (!btn) return;
+
+    const originalText = btn.textContent;
+    
+    btn.textContent = '✅ Copied!';
+    btn.classList.add('copied');
+    
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.classList.remove('copied');
+    }, 2000);
+    
+    this.showStatus(`${contentType} copied to clipboard!`, 'success');
+  }
+
+  /**
    * Show status message
    */
   showStatus(message, type = 'info', duration = 4000) {
@@ -458,15 +600,66 @@ What's your biggest LinkedIn challenge? Drop it in the comments! 👇
     
     const saveBtn = document.getElementById('savePostBtn');
     const convertBtn = document.getElementById('convertBtn');
-    const copyBtn = document.getElementById('copyBtn');
     
-    if (saveBtn) saveBtn.disabled = !hasContent;
     if (convertBtn) convertBtn.disabled = !hasContent;
     
-    // Update copy button based on preview content
-    if (copyBtn) {
-      const previewContent = document.getElementById('linkedinPreview')?.textContent;
-      copyBtn.disabled = !previewContent || !previewContent.trim();
+    // For save button, check if content has changed since last save
+    if (saveBtn) {
+      if (!hasContent) {
+        saveBtn.disabled = true;
+      } else if (this.app.modules?.has('history')) {
+        // Check if content has changed since last save
+        const hasChanged = this.app.modules.get('history').hasContentChanged('', markdownInput.value);
+        saveBtn.disabled = !hasChanged;
+      } else {
+        saveBtn.disabled = !hasContent;
+      }
+    }
+    
+    // Update copy buttons based on preview content
+    const copyBtnLinkedIn = document.getElementById('copyBtnLinkedIn');
+    const copyBtnHTML = document.getElementById('copyBtnHTML');
+    
+    if (copyBtnLinkedIn) {
+      const linkedinContent = document.getElementById('linkedinPreview')?.textContent;
+      copyBtnLinkedIn.disabled = !linkedinContent || !linkedinContent.trim();
+    }
+    
+    if (copyBtnHTML) {
+      const htmlContent = document.getElementById('htmlPreview')?.innerHTML;
+      copyBtnHTML.disabled = !htmlContent || !htmlContent.trim();
+    }
+  }
+
+  /**
+   * Set up event listeners for history events
+   */
+  setupHistoryEventListeners() {
+    if (this.app.modules?.has('history')) {
+      const historyModule = this.app.modules.get('history');
+      
+      // Listen for post not changed events
+      historyModule.on('postNotChanged', (data) => {
+        if (data.reason === 'No changes detected') {
+          this.showStatus('No changes to save', 'info', 2000);
+        } else if (data.reason === 'Duplicate post exists') {
+          this.showStatus('This post already exists in history', 'info', 3000);
+        }
+      });
+
+      // Listen for successful saves
+      historyModule.on('postSaved', (data) => {
+        this.showStatus(`Post saved: ${data.post.title}`, 'success', 3000);
+        // Update UI to reflect new state
+        this.updateUI();
+      });
+
+      // Listen for post loads
+      historyModule.on('postLoaded', (data) => {
+        this.showStatus(`Post loaded: ${data.post.title}`, 'success', 2000);
+        // Update UI to reflect new state
+        this.updateUI();
+      });
     }
   }
 
@@ -497,6 +690,8 @@ What's your biggest LinkedIn challenge? Drop it in the comments! 👇
       healthy: missingElements.length === 0,
       missingElements,
       hasRequiredButtons: !!document.getElementById('savePostBtn'),
+      hasTabInterface: !!document.querySelector('.tab-btn'),
+      hasCopyButtons: !!(document.getElementById('copyBtnLinkedIn') && document.getElementById('copyBtnHTML')),
     };
   }
 

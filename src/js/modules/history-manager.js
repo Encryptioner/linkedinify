@@ -15,6 +15,8 @@ export class HistoryManager extends EventEmitter {
     this.posts = [];
     this.autoSaveTimeout = null;
     this.isOpen = false;
+    this.lastSavedContent = null;
+    this.lastSavedTitle = null;
   }
 
   /**
@@ -89,15 +91,40 @@ export class HistoryManager extends EventEmitter {
       throw new Error('Content is required to save a post');
     }
 
+    const trimmedContent = content.trim();
+    const finalTitle = title || this.generateTitle(trimmedContent);
+
+    // Check if content or title has changed since last save
+    if (this.lastSavedContent === trimmedContent && this.lastSavedTitle === finalTitle) {
+      this.logger.debug('Content unchanged, skipping duplicate save');
+      this.emit('postNotChanged', { reason: 'No changes detected' });
+      return null;
+    }
+
+    // Check if identical post already exists
+    const duplicatePost = this.posts.find(post => 
+      post.content === trimmedContent && post.title === finalTitle
+    );
+
+    if (duplicatePost) {
+      this.logger.debug('Duplicate post exists, skipping save');
+      this.emit('postNotChanged', { reason: 'Duplicate post exists', existingPost: duplicatePost });
+      return duplicatePost;
+    }
+
     try {
       const post = {
         id: Date.now().toString(),
-        title: title || this.generateTitle(content),
-        content: content.trim(),
+        title: finalTitle,
+        content: trimmedContent,
         created: new Date().toISOString(),
         updated: new Date().toISOString(),
-        preview: this.generatePreview(content),
+        preview: this.generatePreview(trimmedContent),
       };
+
+      // Update last saved state
+      this.lastSavedContent = trimmedContent;
+      this.lastSavedTitle = finalTitle;
 
       // Add to beginning of array
       this.posts.unshift(post);
@@ -138,6 +165,8 @@ export class HistoryManager extends EventEmitter {
       const markdownInput = document.getElementById('markdownInput');
       if (markdownInput) {
         markdownInput.value = post.content;
+        // Reset saved state to current loaded content
+        this.resetSavedState(post.title, post.content);
         // Trigger conversion
         if (this.app.convertMarkdown) {
           await this.app.convertMarkdown();
@@ -407,6 +436,28 @@ export class HistoryManager extends EventEmitter {
         ? Math.round(this.posts.reduce((sum, post) => sum + post.content.length, 0) / this.posts.length)
         : 0,
     };
+  }
+
+  /**
+   * Check if current content has changed since last save
+   */
+  hasContentChanged(title, content) {
+    if (!content || typeof content !== 'string') {
+      return false;
+    }
+
+    const trimmedContent = content.trim();
+    const finalTitle = title || this.generateTitle(trimmedContent);
+
+    return this.lastSavedContent !== trimmedContent || this.lastSavedTitle !== finalTitle;
+  }
+
+  /**
+   * Reset last saved state (call when content is loaded from history)
+   */
+  resetSavedState(title, content) {
+    this.lastSavedContent = content?.trim() || null;
+    this.lastSavedTitle = title || null;
   }
 
   /**

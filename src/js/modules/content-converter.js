@@ -28,7 +28,7 @@ export class ContentConverter extends EventEmitter {
   }
 
   /**
-   * Convert Markdown to LinkedIn-ready text
+   * Convert Markdown to LinkedIn-ready text with proper formatting
    */
   async markdownToLinkedIn(markdown) {
     if (!markdown || typeof markdown !== 'string') {
@@ -38,27 +38,30 @@ export class ContentConverter extends EventEmitter {
     try {
       let converted = markdown.trim();
 
-      // Convert headers (remove markdown syntax, keep content)
-      converted = converted.replace(/^### (.*$)/gm, '$1');
-      converted = converted.replace(/^## (.*$)/gm, '$1');
-      converted = converted.replace(/^# (.*$)/gm, '$1');
+      // Convert headers using LinkedIn-style bold Unicode characters
+      converted = converted.replace(/^### (.*$)/gm, '𝗦𝘂𝗯𝗵𝗲𝗮𝗱𝗶𝗻𝗴: $1\n');
+      converted = converted.replace(/^## (.*$)/gm, '𝗞𝗲𝘆 𝗣𝗼𝗶𝗻𝘁: $1\n');
+      converted = converted.replace(/^# (.*$)/gm, '𝗧𝗜𝗧𝗟𝗘: $1\n');
 
-      // Preserve bold and italic formatting (LinkedIn supports these)
+      // Convert bold and italic with proper LinkedIn formatting
       converted = converted.replace(/\*\*\*(.*?)\*\*\*/g, '***$1***');
-      converted = converted.replace(/\*\*(.*?)\*\*/g, '**$1**');
-      converted = converted.replace(/(?<!\*)\*(?!\*)([^*]+)(?<!\*)\*(?!\*)/g, '*$1*');
+      converted = converted.replace(/\*\*(.*?)\*\*/g, (match, text) => {
+        return this.toBoldUnicode(text);
+      });
+      converted = converted.replace(/(?<!\*)\*(?!\*)([^*]+)(?<!\*)\*(?!\*)/g, '📍 $1');
 
-      // Convert code blocks to readable format
+      // Convert code blocks with proper LinkedIn format
       converted = converted.replace(/```(\w+)?\n([\s\S]*?)\n```/g, (match, lang, code) => {
+        const language = (lang || 'CODE').toUpperCase();
         const lines = code.trim().split('\n');
-        const border = '─'.repeat(Math.min(40, Math.max(...lines.map(line => line.length))));
-        return `\n┌─${border}─┐\n${lines.map(line => `│ ${line.padEnd(Math.max(...lines.map(l => l.length)))} │`).join('\n')}\n└─${border}─┘\n`;
+        const codeBlock = lines.map(line => `│ ${line}`).join('\n');
+        return `\n┌─── 💻 ${language} ───\n${codeBlock}\n└────────────────────\n`;
       });
 
-      // Convert inline code (remove backticks but preserve content)
+      // Convert inline code (keep as is for now)
       converted = converted.replace(/`([^`]+)`/g, '$1');
 
-      // Convert blockquotes to thought bubbles or quotes
+      // Convert blockquotes 
       converted = converted.replace(/^> (.*$)/gm, '💭 $1');
 
       // Convert unordered lists
@@ -70,7 +73,7 @@ export class ContentConverter extends EventEmitter {
       // Convert markdown links to readable format
       converted = converted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1 ($2)');
 
-      // Clean up extra whitespace while preserving intentional spacing
+      // Preserve double newlines but remove triple+
       converted = converted.replace(/\n{3,}/g, '\n\n');
 
       // Final trim
@@ -89,6 +92,23 @@ export class ContentConverter extends EventEmitter {
       this.emit('error', error);
       return markdown; // Return original on error
     }
+  }
+
+  /**
+   * Convert text to bold Unicode characters for LinkedIn
+   */
+  toBoldUnicode(text) {
+    const boldMap = {
+      'A': '𝗔', 'B': '𝗕', 'C': '𝗖', 'D': '𝗗', 'E': '𝗘', 'F': '𝗙', 'G': '𝗚', 'H': '𝗛', 'I': '𝗜',
+      'J': '𝗝', 'K': '𝗞', 'L': '𝗟', 'M': '𝗠', 'N': '𝗡', 'O': '𝗢', 'P': '𝗣', 'Q': '𝗤', 'R': '𝗥',
+      'S': '𝗦', 'T': '𝗧', 'U': '𝗨', 'V': '𝗩', 'W': '𝗪', 'X': '𝗫', 'Y': '𝗬', 'Z': '𝗭',
+      'a': '𝗮', 'b': '𝗯', 'c': '𝗰', 'd': '𝗱', 'e': '𝗲', 'f': '𝗳', 'g': '𝗴', 'h': '𝗵', 'i': '𝗶',
+      'j': '𝗷', 'k': '𝗸', 'l': '𝗹', 'm': '𝗺', 'n': '𝗻', 'o': '𝗼', 'p': '𝗽', 'q': '𝗾', 'r': '𝗿',
+      's': '𝘀', 't': '𝘁', 'u': '𝘂', 'v': '𝘃', 'w': '𝘄', 'x': '𝘅', 'y': '𝘆', 'z': '𝘇',
+      '0': '𝟬', '1': '𝟭', '2': '𝟮', '3': '𝟯', '4': '𝟰', '5': '𝟱', '6': '𝟲', '7': '𝟳', '8': '𝟴', '9': '𝟵'
+    };
+    
+    return text.split('').map(char => boldMap[char] || char).join('');
   }
 
   /**

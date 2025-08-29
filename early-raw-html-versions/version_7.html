@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown to LinkedIn - Professional Converter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/5.1.2/marked.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0077b5 0%, #005582 50%, #004182 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0077b5 0%, #004182 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 12px;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .toolbar {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e1e5e9;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .toolbar-group::after {
+            content: '';
+            width: 1px;
+            height: 20px;
+            background: #dee2e6;
+            margin: 0 8px;
+        }
+
+        .toolbar-group:last-child::after {
+            display: none;
+        }
+
+        .toolbar-btn {
+            background: white;
+            border: 1px solid #dee2e6;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 36px;
+            text-align: center;
+        }
+
+        .toolbar-btn:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .toolbar-btn.active {
+            background: #0077b5;
+            color: white;
+            border-color: #0077b5;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            min-height: 70vh;
+        }
+
+        .input-section, .preview-section, .output-section {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-section {
+            border-right: 1px solid #e1e5e9;
+            background: #fdfdfd;
+        }
+
+        .preview-section {
+            border-right: 1px solid #e1e5e9;
+            background: white;
+        }
+
+        .output-section {
+            background: #fdfdfd;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .markdown-input {
+            flex: 1;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+            background: white;
+            transition: all 0.3s ease;
+            min-height: 400px;
+        }
+
+        .markdown-input:focus {
+            outline: none;
+            border-color: #0077b5;
+            box-shadow: 0 0 0 3px rgba(0, 119, 181, 0.1);
+        }
+
+        .preview-area {
+            flex: 1;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 20px;
+            background: white;
+            overflow-y: auto;
+            line-height: 1.7;
+            min-height: 400px;
+        }
+
+        .preview-area h1, .preview-area h2, .preview-area h3 {
+            color: #2c3e50;
+            margin: 20px 0 12px 0;
+        }
+
+        .preview-area h1 { font-size: 1.8rem; }
+        .preview-area h2 { font-size: 1.5rem; }
+        .preview-area h3 { font-size: 1.3rem; }
+
+        .preview-area pre {
+            background: #f8f9fa;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            margin: 16px 0;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+        }
+
+        .preview-area code {
+            background: #f1f3f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        .preview-area blockquote {
+            border-left: 4px solid #0077b5;
+            padding: 8px 16px;
+            margin: 16px 0;
+            background: #f8f9fa;
+            font-style: italic;
+        }
+
+        .output-preview {
+            flex: 1;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 20px;
+            background: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            color: #2c3e50;
+            min-height: 400px;
+        }
+
+        .convert-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #0077b5 0%, #004182 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 119, 181, 0.3);
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 119, 181, 0.4);
+        }
+
+        .copy-btn.copied {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .example-btn {
+            background: transparent;
+            color: #0077b5;
+            border: 2px solid #0077b5;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            align-self: flex-start;
+            font-weight: 500;
+        }
+
+        .example-btn:hover {
+            background: #0077b5;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .status {
+            margin-top: 12px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .note {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 12px;
+            padding: 10px 14px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 3px solid #dee2e6;
+        }
+
+        .features {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 40px 30px;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .features h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .features-grid li {
+            color: #495057;
+            font-size: 0.95rem;
+            list-style: none;
+            padding: 8px 0;
+        }
+
+        .features-grid li:before {
+            content: "✨";
+            margin-right: 10px;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .footer h4 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .footer p {
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+        }
+
+        .social-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .copyright {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 15px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .output-section {
+                grid-column: span 2;
+                border-top: 1px solid #e1e5e9;
+            }
+
+            .input-section, .preview-section {
+                border-bottom: 1px solid #e1e5e9;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 2.2rem;
+            }
+
+            .toolbar {
+                padding: 12px 20px;
+                justify-content: center;
+            }
+
+            .toolbar-group::after {
+                display: none;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-section, .preview-section, .output-section {
+                padding: 20px;
+                border-right: none;
+                border-bottom: 1px solid #e1e5e9;
+            }
+
+            .section-title {
+                font-size: 1.2rem;
+            }
+
+            .markdown-input, .preview-area, .output-preview {
+                min-height: 300px;
+            }
+
+            .features {
+                padding: 30px 20px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header .subtitle {
+                font-size: 1rem;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .toolbar-group {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .input-section, .preview-section, .output-section {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1>📝 Markdown to LinkedIn Pro</h1>
+                <p class="subtitle">Transform your Markdown content into LinkedIn-ready posts with professional formatting</p>
+            </div>
+        </div>
+        
+        <div class="toolbar">
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="formatText('**', '**')" title="Bold"><strong>B</strong></button>
+                <button class="toolbar-btn" onclick="formatText('*', '*')" title="Italic"><em>I</em></button>
+                <button class="toolbar-btn" onclick="formatText('`', '`')" title="Inline Code">&lt;/&gt;</button>
+            </div>
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="formatHeading(1)" title="Heading 1">H1</button>
+                <button class="toolbar-btn" onclick="formatHeading(2)" title="Heading 2">H2</button>
+                <button class="toolbar-btn" onclick="formatHeading(3)" title="Heading 3">H3</button>
+            </div>
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="formatList('- ')" title="Bullet List">• List</button>
+                <button class="toolbar-btn" onclick="formatList('1. ')" title="Numbered List">1. List</button>
+                <button class="toolbar-btn" onclick="formatText('> ', '')" title="Quote">Quote</button>
+            </div>
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="insertCodeBlock()" title="Code Block">{ }</button>
+                <button class="toolbar-btn" onclick="insertLink()" title="Link">🔗</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">✍️ Markdown Editor</h2>
+                <button class="example-btn" onclick="loadExample()">📋 Load Example</button>
+                <textarea 
+                    class="markdown-input" 
+                    id="markdownInput" 
+                    placeholder="Start typing your Markdown here...
+
+# Your Title Here
+
+## Key Points
+
+Here's some **bold text** and *italic text*.
+
+```javascript
+function hello() {
+    console.log('Hello LinkedIn!');
+}
+```
+
+- First bullet point  
+- Second bullet point
+
+> This is a quote
+
+[LinkedIn](https://linkedin.com)"
+                ></textarea>
+                <button class="convert-btn" onclick="convertMarkdown()">🚀 Convert to LinkedIn</button>
+                <div id="status" class="status" style="display: none;"></div>
+            </div>
+            
+            <div class="preview-section">
+                <h2 class="section-title">👀 HTML Preview</h2>
+                <div class="preview-area" id="htmlPreview">Your HTML preview will appear here...</div>
+                <div class="note">📌 This shows how your content renders with full HTML formatting</div>
+            </div>
+
+            <div class="output-section">
+                <h2 class="section-title">📋 LinkedIn Ready</h2>
+                <div class="output-preview" id="linkedinPreview">Your LinkedIn-optimized content will appear here...</div>
+                <button class="copy-btn" id="copyBtn" onclick="copyToClipboard()">📋 Copy for LinkedIn</button>
+                <div class="note">🎯 This format is optimized for LinkedIn's text limitations and will paste perfectly</div>
+            </div>
+        </div>
+
+        <div class="features">
+            <h3>✨ Why Choose Our Converter?</h3>
+            <ul class="features-grid">
+                <li>Rich text editor with toolbar buttons</li>
+                <li>Real-time HTML preview</li>
+                <li>LinkedIn-optimized formatting</li>
+                <li>All programming languages supported</li>
+                <li>Smart code block borders</li>
+                <li>Mobile-responsive design</li>
+                <li>Professional grade output</li>
+                <li>Copy with HTML + Plain text</li>
+                <li>Header to emoji conversion</li>
+                <li>Smart list formatting</li>
+                <li>Link optimization for LinkedIn</li>
+                <li>Quote styling with emojis</li>
+            </ul>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <h4>Created with ❤️ by Ankur Mursalin</h4>
+                <p>Making Markdown accessible for everyone on LinkedIn</p>
+                
+                <div class="social-links">
+                    <a href="#" class="social-link" title="LinkedIn">💼</a>
+                    <a href="#" class="social-link" title="Twitter">🐦</a>
+                    <a href="#" class="social-link" title="GitHub">🐙</a>
+                    <a href="#" class="social-link" title="Website">🌐</a>
+                    <a href="#" class="social-link" title="Email">📧</a>
+                </div>
+                
+                <div class="copyright">
+                    © 2024 Markdown to LinkedIn Pro. Built for the developer community.
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Configure marked for better parsing
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            highlight: function(code, lang) {
+                return code;
+            }
+        });
+
+        function convertMarkdown() {
+            const input = document.getElementById('markdownInput').value;
+            const statusEl = document.getElementById('status');
+            
+            try {
+                // Convert to HTML first
+                const html = marked.parse(input);
+                document.getElementById('htmlPreview').innerHTML = html;
+                
+                // Convert to LinkedIn-safe format
+                const linkedinContent = htmlToLinkedInSafe(html);
+                document.getElementById('linkedinPreview').textContent = linkedinContent;
+                
+                showStatus('✅ Conversion successful! Ready to copy.', 'success');
+            } catch (error) {
+                console.error('Conversion error:', error);
+                showStatus('❌ Conversion failed. Please check your markdown.', 'error');
+            }
+        }
+
+        function htmlToLinkedInSafe(html) {
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            
+            // Convert headings to bold text with emojis
+            doc.querySelectorAll('h1').forEach(h => {
+                const p = doc.createElement('p');
+                p.textContent = `🔥 ${h.textContent.toUpperCase()}\n`;
+                h.replaceWith(p);
+            });
+            
+            doc.querySelectorAll('h2').forEach(h => {
+                const p = doc.createElement('p');
+                p.textContent = `💡 ${h.textContent}\n`;
+                h.replaceWith(p);
+            });
+            
+            doc.querySelectorAll('h3').forEach(h => {
+                const p = doc.createElement('p');
+                p.textContent = `📌 ${h.textContent}\n`;
+                h.replaceWith(p);
+            });
+
+            // Convert code blocks with language detection and clean borders
+            doc.querySelectorAll('pre code, pre').forEach(pre => {
+                const codeElement = pre.tagName === 'CODE' ? pre : pre.querySelector('code');
+                const code = codeElement ? codeElement.textContent : pre.textContent;
+                
+                // Try to detect language from class
+                const className = codeElement ? codeElement.className : '';
+                const langMatch = className.match(/language-(\w+)/);
+                const lang = langMatch ? langMatch[1].toUpperCase() : 'CODE';
+                
+                const lines = code.trim().split('\n');
+                
+                // Create clean code block without trailing symbols
+                const formattedCode = [
+                    `┌─── 💻 ${lang} ────────────────────┐`,
+                    ...lines.map(line => `│ ${line}`),
+                    `└${'─'.repeat(30)}┘`
+                ].join('\n');
+
+                const p = doc.createElement('p');
+                p.textContent = '\n' + formattedCode + '\n';
+                (pre.tagName === 'CODE' ? pre.parentElement : pre).replaceWith(p);
+            });
+
+            // Convert inline code
+            doc.querySelectorAll('code').forEach(code => {
+                const span = doc.createElement('span');
+                span.textContent = `⟨${code.textContent}⟩`;
+                code.replaceWith(span);
+            });
+
+            // Convert blockquotes
+            doc.querySelectorAll('blockquote').forEach(quote => {
+                const p = doc.createElement('p');
+                p.textContent = `💭 "${quote.textContent.trim()}"`;
+                quote.replaceWith(p);
+            });
+
+            // Convert links
+            doc.querySelectorAll('a[href]').forEach(a => {
+                const span = doc.createElement('span');
+                const text = a.textContent.trim();
+                const url = a.getAttribute('href');
+                span.textContent = text && text !== url ? `${text}: ${url}` : url;
+                a.replaceWith(span);
+            });
+
+            // Convert lists
+            doc.querySelectorAll('ul').forEach(ul => {
+                const fragment = doc.createDocumentFragment();
+                ul.querySelectorAll('li').forEach(li => {
+                    const p = doc.createElement('p');
+                    p.textContent = `• ${li.textContent.trim()}`;
+                    fragment.appendChild(p);
+                });
+                ul.replaceWith(fragment);
+            });
+
+            doc.querySelectorAll('ol').forEach(ol => {
+                let counter = 1;
+                const fragment = doc.createDocumentFragment();
+                ol.querySelectorAll('li').forEach(li => {
+                    const p = doc.createElement('p');
+                    p.textContent = `${counter++}. ${li.textContent.trim()}`;
+                    fragment.appendChild(p);
+                });
+                ol.replaceWith(fragment);
+            });
+
+            // Convert tables (basic support)
+            doc.querySelectorAll('table').forEach(table => {
+                const rows = [];
+                table.querySelectorAll('tr').forEach(tr => {
+                    const cells = Array.from(tr.children).map(td => td.textContent.trim());
+                    rows.push(cells.join(' | '));
+                });
+                const p = doc.createElement('p');
+                p.textContent = rows.join('\n');
+                table.replaceWith(p);
+            });
+
+            // Clean up and return text
+            return doc.body.textContent || doc.body.innerText || '';
+        }
+
+        // Rich text editor functions
+        function formatText(startTag, endTag) {
+            const textarea = document.getElementById('markdownInput');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const selectedText = text.substring(start, end);
+            
+            if (selectedText) {
+                const newText = text.substring(0, start) + startTag + selectedText + endTag + text.substring(end);
+                textarea.value = newText;
+                textarea.setSelectionRange(start + startTag.length, end + startTag.length);
+            } else {
+                const newText = text.substring(0, start) + startTag + 'text' + endTag + text.substring(end);
+                textarea.value = newText;
+                textarea.setSelectionRange(start + startTag.length, start + startTag.length + 4);
+            }
+            
+            textarea.focus();
+            convertMarkdown();
+        }
+
+        function formatHeading(level) {
+            const textarea = document.getElementById('markdownInput');
+            const start = textarea.selectionStart;
+            const text = textarea.value;
+            
+            // Find the start of the current line
+            let lineStart = text.lastIndexOf('\n', start - 1) + 1;
+            const lineEnd = text.indexOf('\n', start);
+            const currentLine = text.substring(lineStart, lineEnd === -1 ? text.length : lineEnd);
+            
+            // Remove existing heading markers
+            const cleanLine = currentLine.replace(/^#+\s*/, '');
+            const headingMarker = '#'.repeat(level) + ' ';
+            const newLine = headingMarker + (cleanLine || 'Heading');
+            
+            const newText = text.substring(0, lineStart) + newLine + text.substring(lineEnd === -1 ? text.length : lineEnd);
+            textarea.value = newText;
+            textarea.setSelectionRange(lineStart + headingMarker.length, lineStart + newLine.length);
+            textarea.focus();
+            convertMarkdown();
+        }
+
+        function formatList(prefix) {
+            const textarea = document.getElementById('markdownInput');
+            const start = textarea.selectionStart;
+            const text = textarea.value;
+            
+            let lineStart = text.lastIndexOf('\n', start - 1) + 1;
+            const lineEnd = text.indexOf('\n', start);
+            const currentLine = text.substring(lineStart, lineEnd === -1 ? text.length : lineEnd);
+            
+            const newLine = currentLine.trim() ? prefix + currentLine.replace(/^[-*+]\s*|\d+\.\s*/, '') : prefix + 'List item';
+            
+            const newText = text.substring(0, lineStart) + newLine + text.substring(lineEnd === -1 ? text.length : lineEnd);
+            textarea.value = newText;
+            textarea.setSelectionRange(lineStart + prefix.length, lineStart + newLine.length);
+            textarea.focus();
+            convertMarkdown();
+        }
+
+        function insertCodeBlock() {
+            const textarea = document.getElementById('markdownInput');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const selectedText = text.substring(start, end);
+            
+            const codeBlock = selectedText ? 
+                `\`\`\`javascript\n${selectedText}\n\`\`\`` : 
+                `\`\`\`javascript\n// Your code here\nconsole.log('Hello World!');\n\`\`\``;
+            
+            const newText = text.substring(0, start) + codeBlock + text.substring(end);
+            textarea.value = newText;
+            textarea.setSelectionRange(start + 13, start + 13 + (selectedText ? selectedText.length : 17));
+            textarea.focus();
+            convertMarkdown();
+        }
+
+        function insertLink() {
+            const textarea = document.getElementById('markdownInput');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const selectedText = text.substring(start, end);
+            
+            const linkText = selectedText || 'Link Text';
+            const linkMarkdown = `[${linkText}](https://example.com)`;
+            
+            const newText = text.substring(0, start) + linkMarkdown + text.substring(end);
+            textarea.value = newText;
+            textarea.setSelectionRange(start + linkText.length + 3, start + linkText.length + 22);
+            textarea.focus();
+            convertMarkdown();
+        }
+
+        async function copyToClipboard() {
+            const linkedinContent = document.getElementById('linkedinPreview').textContent;
+            const htmlContent = document.getElementById('htmlPreview').innerHTML;
+            const btn = document.getElementById('copyBtn');
+            
+            try {
+                if (navigator.clipboard && window.ClipboardItem) {
+                    // Modern clipboard API with both HTML and plain text
+                    const clipboardItem = new ClipboardItem({
+                        'text/html': new Blob([htmlContent], { type: 'text/html' }),
+                        'text/plain': new Blob([linkedinContent], { type: 'text/plain' })
+                    });
+                    await navigator.clipboard.write([clipboardItem]);
+                } else {
+                    // Fallback to plain text
+                    await navigator.clipboard.writeText(linkedinContent);
+                }
+                
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied Successfully!';
+                btn.classList.add('copied');
+                showStatus('🎉 Content copied! Paste it into your LinkedIn post composer.', 'success');
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Copy failed:', error);
+                showStatus('❌ Copy failed. Please select the text and copy manually.', 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            statusEl.style.display = 'block';
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 5000);
+        }
+
+        function loadExample() {
+            const example = `# 🚀 Master Modern JavaScript in 2024
+
+## Essential patterns every developer needs to know
+
+Learning modern JavaScript can feel *overwhelming*, but mastering these **fundamental concepts** will make you a more effective developer:
+
+### 1. Destructuring & Spread Operator
+
+\`\`\`javascript
+// Object destructuring
+const { name, age, ...rest } = user;
+
+// Array destructuring  
+const [first, second, ...others] = numbers;
+
+// Spread in function calls
+const mergedData = { ...user, ...settings };
+\`\`\`
+
+### 2. Async/Await Magic
+
+\`\`\`typescript
+async function fetchUserProfile(id: string): Promise<User> {
+    try {
+        const response = await fetch(\`/api/users/\${id}\`);
+        if (!response.ok) throw new Error('User not found');
+        return await response.json();
+    } catch (error) {
+        console.error('Profile fetch failed:', error);
+        throw error;
+    }
+}
+\`\`\`
+
+### 3. Key Benefits You'll Get
+
+- **Cleaner code** with destructuring syntax
+- *Better error handling* with async/await
+- Improved performance with spread operator
+- Enhanced type safety with TypeScript
+
+> "Any application that can be written in JavaScript, will eventually be written in JavaScript." - Atwood's Law
+
+### 4. Python Developer? Here's the Equivalent
+
+\`\`\`python
+# Python async patterns
+import asyncio
+import aiohttp
+
+async def fetch_user_profile(user_id: str) -> dict:
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f"/api/users/{user_id}") as response:
+            if response.status == 200:
+                return await response.json()
+            raise Exception(f"User {user_id} not found")
+\`\`\`
+
+**Pro tips for success:**
+- Always use \`const\` for immutable references
+- Prefer \`let\` over \`var\` for reassignment
+- Master array methods: \`map()\`, \`filter()\`, \`reduce()\`
+- Practice with real projects, not just tutorials
+
+Ready to dive deeper? Check out these resources:
+
+📚 [MDN JavaScript Guide](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide)
+🎓 [JavaScript.info](https://javascript.info)
+💻 [FreeCodeCamp](https://freecodecamp.org)
+
+**What's your favorite JavaScript ES6+ feature?** Drop your thoughts below! 👇
+
+---
+
+*Follow me for more programming tips and web development insights!* ⚡
+
+#JavaScript #WebDevelopment #Programming #TechTips #Coding`;
+
+            document.getElementById('markdownInput').value = example;
+            convertMarkdown();
+        }
+
+        // Auto-convert on input with debounce
+        let timeoutId;
+        document.getElementById('markdownInput').addEventListener('input', () => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(convertMarkdown, 300);
+        });
+
+        // Load example on page load
+        window.addEventListener('load', () => {
+            setTimeout(loadExample, 200);
+        });
+
+        // Add keyboard shortcuts
+        document.getElementById('markdownInput').addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'b':
+                        e.preventDefault();
+                        formatText('**', '**');
+                        break;
+                    case 'i':
+                        e.preventDefault();
+                        formatText('*', '*');
+                        break;
+                    case 'k':
+                        e.preventDefault();
+                        insertLink();
+                        break;
+                    case '`':
+                        e.preventDefault();
+                        formatText('`', '`');
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

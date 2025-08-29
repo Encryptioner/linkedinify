@@ -1,4 +1,4 @@
-# Initial Idea
+# Instructions for Initial Idea by Claude AI
 
 
 ## 1

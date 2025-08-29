@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown to LinkedIn - Professional Converter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/5.1.2/marked.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #0077b5;
+            --primary-dark: #004182;
+            --primary-light: #005582;
+            --success-color: #28a745;
+            --success-dark: #20c997;
+            --background-primary: #ffffff;
+            --background-secondary: #f8f9fa;
+            --background-tertiary: #fdfdfd;
+            --text-primary: #2c3e50;
+            --text-secondary: #495057;
+            --text-muted: #6c757d;
+            --border-color: #e1e5e9;
+            --border-light: #dee2e6;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --shadow-hover: rgba(0, 0, 0, 0.15);
+        }
+
+        [data-theme="dark"] {
+            --background-primary: #1e1e1e;
+            --background-secondary: #2d2d30;
+            --background-tertiary: #252526;
+            --text-primary: #e4e6ea;
+            --text-secondary: #b3b3b3;
+            --text-muted: #8a8b8c;
+            --border-color: #3e3e42;
+            --border-light: #484850;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --shadow-hover: rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 50%, var(--primary-dark) 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--background-primary);
+            min-height: 100vh;
+            box-shadow: 0 0 30px var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .theme-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .history-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .history-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .toolbar {
+            background: var(--background-secondary);
+            padding: 15px 30px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .toolbar-group::after {
+            content: '';
+            width: 1px;
+            height: 20px;
+            background: var(--border-light);
+            margin: 0 8px;
+        }
+
+        .toolbar-group:last-child::after {
+            display: none;
+        }
+
+        .toolbar-btn {
+            background: var(--background-primary);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 36px;
+            text-align: center;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--background-secondary);
+            border-color: var(--border-color);
+        }
+
+        .toolbar-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            min-height: 70vh;
+        }
+
+        .input-section, .preview-section, .output-section {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-section {
+            border-right: 1px solid var(--border-color);
+            background: var(--background-tertiary);
+        }
+
+        .preview-section {
+            border-right: 1px solid var(--border-color);
+            background: var(--background-primary);
+        }
+
+        .output-section {
+            background: var(--background-tertiary);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .markdown-input {
+            flex: 1;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+            background: var(--background-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            min-height: 400px;
+        }
+
+        .markdown-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 119, 181, 0.1);
+        }
+
+        .preview-area {
+            flex: 1;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            background: var(--background-primary);
+            color: var(--text-primary);
+            overflow-y: auto;
+            line-height: 1.7;
+            min-height: 400px;
+            transition: all 0.3s ease;
+        }
+
+        .preview-area h1, .preview-area h2, .preview-area h3 {
+            color: var(--text-primary);
+            margin: 20px 0 12px 0;
+        }
+
+        .preview-area h1 { font-size: 1.8rem; }
+        .preview-area h2 { font-size: 1.5rem; }
+        .preview-area h3 { font-size: 1.3rem; }
+
+        .preview-area pre {
+            background: var(--background-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            margin: 16px 0;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+        }
+
+        .preview-area code {
+            background: var(--background-secondary);
+            color: var(--text-primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        .preview-area blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding: 8px 16px;
+            margin: 16px 0;
+            background: var(--background-secondary);
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+
+        /* LinkedIn Preview Styles */
+        .linkedin-preview-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .linkedin-mode-btn {
+            background: var(--background-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .linkedin-mode-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .output-preview {
+            flex: 1;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            background: var(--background-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            color: var(--text-primary);
+            min-height: 400px;
+            transition: all 0.3s ease;
+        }
+
+        /* LinkedIn Theme Previews */
+        .output-preview.linkedin-light {
+            background: #ffffff;
+            color: #000000;
+            border-color: #e0e0e0;
+        }
+
+        .output-preview.linkedin-dark {
+            background: #1b1f23;
+            color: #f0f2f5;
+            border-color: #38434f;
+        }
+
+        .output-preview.mobile-view {
+            max-width: 350px;
+            font-size: 13px;
+            padding: 15px;
+            margin: 0 auto;
+        }
+
+        .convert-btn {
+            background: linear-gradient(135deg, var(--success-color) 0%, var(--success-dark) 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 119, 181, 0.3);
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 119, 181, 0.4);
+        }
+
+        .copy-btn.copied {
+            background: linear-gradient(135deg, var(--success-color) 0%, var(--success-dark) 100%);
+        }
+
+        .example-btn {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            align-self: flex-start;
+            font-weight: 500;
+        }
+
+        .example-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .status {
+            margin-top: 12px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .note {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 12px;
+            padding: 10px 14px;
+            background: var(--background-secondary);
+            border-radius: 8px;
+            border-left: 3px solid var(--border-light);
+            transition: all 0.3s ease;
+        }
+
+        /* History Sidebar */
+        .history-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: var(--background-primary);
+            border-left: 1px solid var(--border-color);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -2px 0 10px var(--shadow);
+        }
+
+        .history-sidebar.open {
+            right: 0;
+        }
+
+        .history-header {
+            padding: 20px;
+            background: var(--background-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: var(--background-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .history-item:hover {
+            background: var(--background-tertiary);
+            border-color: var(--primary-color);
+        }
+
+        .history-item.active {
+            border-color: var(--primary-color);
+            background: var(--background-tertiary);
+        }
+
+        .history-item-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item-preview {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-item-date {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .history-action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .history-action-btn:hover {
+            background: var(--background-primary);
+            color: var(--text-primary);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .save-controls {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .save-btn {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .save-btn:hover {
+            background: #218838;
+        }
+
+        .features {
+            background: linear-gradient(135deg, var(--background-secondary) 0%, var(--background-tertiary) 100%);
+            padding: 40px 30px;
+            border-top: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .features h3 {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .features-grid li {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            list-style: none;
+            padding: 8px 0;
+        }
+
+        .features-grid li:before {
+            content: "✨";
+            margin-right: 10px;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .footer h4 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .footer p {
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+        }
+
+        .social-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .copyright {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 15px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .output-section {
+                grid-column: span 2;
+                border-top: 1px solid var(--border-color);
+            }
+
+            .input-section, .preview-section {
+                border-bottom: 1px solid var(--border-color);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 2.2rem;
+            }
+
+            .header-top {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .theme-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .toolbar {
+                padding: 12px 20px;
+                justify-content: center;
+            }
+
+            .toolbar-group::after {
+                display: none;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-section, .preview-section, .output-section {
+                padding: 20px;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .section-title {
+                font-size: 1.2rem;
+            }
+
+            .markdown-input, .preview-area, .output-preview {
+                min-height: 300px;
+            }
+
+            .features {
+                padding: 30px 20px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .history-sidebar {
+                width: 100vw;
+                right: -100vw;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header .subtitle {
+                font-size: 1rem;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .toolbar-group {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .input-section, .preview-section, .output-section {
+                padding: 15px;
+            }
+
+            .linkedin-preview-controls {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-top">
+                    <div></div>
+                    <div class="theme-controls">
+                        <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+                        <button class="history-toggle" onclick="toggleHistory()">📚 History</button>
+                    </div>
+                </div>
+                <h1>📝 Markdown to LinkedIn Pro</h1>
+                <p class="subtitle">Transform your Markdown content into LinkedIn-ready posts with professional formatting</p>
+            </div>
+        </div>
+        
+        <div class="toolbar">
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="formatText('**', '**')" title="Bold"><strong>B</strong></button>
+                <button class="toolbar-btn" onclick="formatText('*', '*')" title="Italic"><em>I</em></button>
+                <button class="toolbar-btn" onclick="formatText('`', '`')" title="Inline Code">&lt;/&gt;</button>
+            </div>
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="formatHeading(1)" title="Heading 1">H1</button>
+                <button class="toolbar-btn" onclick="formatHeading(2)" title="Heading 2">H2</button>
+                <button class="toolbar-btn" onclick="formatHeading(3)" title="Heading 3">H3</button>
+            </div>
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="formatList('- ')" title="Bullet List">• List</button>
+                <button class="toolbar-btn" onclick="formatList('1. ')" title="Numbered List">1. List</button>
+                <button class="toolbar-btn" onclick="formatText('> ', '')" title="Quote">Quote</button>
+            </div>
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="insertCodeBlock()" title="Code Block">{ }</button>
+                <button class="toolbar-btn" onclick="insertLink()" title="Link">🔗</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">✍️ Markdown Editor</h2>
+                <div class="save-controls">
+                    <button class="example-btn" onclick="loadExample()">📋 Load Example</button>
+                    <button class="save-btn" onclick="saveCurrentPost()">💾 Save Post</button>
+                </div>
+                <textarea 
+                    class="markdown-input" 
+                    id="markdownInput" 
+                    placeholder="Start typing your Markdown here...
+
+# Your Title Here
+
+## Key Points
+
+Here's some **bold text** and *italic text*.
+
+```javascript
+function hello() {
+    console.log('Hello LinkedIn!');
+}
+```
+
+- First bullet point  
+- Second bullet point
+
+> This is a quote
+
+[LinkedIn](https://linkedin.com)"
+                ></textarea>
+                <button class="convert-btn" onclick="convertMarkdown()">🚀 Convert to LinkedIn</button>
+                <div id="status" class="status" style="display: none;"></div>
+            </div>
+            
+            <div class="preview-section">
+                <h2 class="section-title">👀 HTML Preview</h2>
+                <div class="preview-area" id="htmlPreview">Your HTML preview will appear here...</div>
+                <div class="note">📌 This shows how your content renders with full HTML formatting</div>
+            </div>
+
+            <div class="output-section">
+                <h2 class="section-title">📋 LinkedIn Ready</h2>
+                <div class="linkedin-preview-controls">
+                    <button class="linkedin-mode-btn active" data-theme="light" onclick="setLinkedInTheme('light')">☀️ Light</button>
+                    <button class="linkedin-mode-btn" data-theme="dark" onclick="setLinkedInTheme('dark')">🌙 Dark</button>
+                    <button class="linkedin-mode-btn active" data-view="web" onclick="setLinkedInView('web')">💻 Web</button>
+                    <button class="linkedin-mode-btn" data-view="mobile" onclick="setLinkedInView('mobile')">📱 Mobile</button>
+                </div>
+                <div class="output-preview linkedin-light" id="linkedinPreview">Your LinkedIn-optimized content will appear here...</div>
+                <button class="copy-btn" id="copyBtn" onclick="copyToClipboard()">📋 Copy for LinkedIn</button>
+                <div class="note">🎯 This preview shows how your post will look on LinkedIn in the selected theme and device</div>
+            </div>
+        </div>
+
+        <div class="features">
+            <h3>✨ Advanced Features</h3>
+            <ul class="features-grid">
+                <li>Dark & Light theme support</li>
+                <li>LinkedIn preview (Light/Dark mode)</li>
+                <li>Web & Mobile view simulation</li>
+                <li>Rich text editor with toolbar</li>
+                <li>History management with localStorage</li>
+                <li>Real-time conversion</li>
+                <li>All programming languages supported</li>
+                <li>Professional grade output</li>
+                <li>Mobile-responsive design</li>
+                <li>Keyboard shortcuts support</li>
+                <li>Copy with HTML + Plain text</li>
+                <li>Smart formatting optimization</li>
+            </ul>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <h4>Created with ❤️ by Ankur Mursalin</h4>
+                <p>Making Markdown accessible for everyone on LinkedIn</p>
+                
+                <div class="social-links">
+                    <a href="#" class="social-link" title="LinkedIn">💼</a>
+                    <a href="#" class="social-link" title="Twitter

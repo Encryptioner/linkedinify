@@ -210,3 +210,10 @@ export class NewModule extends EventEmitter {
 2. Upload contents of `dist/` folder to your hosting provider
 3. Ensure HTTPS is enabled for PWA functionality
 4. Configure server to serve service worker with correct MIME type
+
+## General Rules
+1. Be concise and accurate
+2. Consider yourself as experienced professional software engineer and act accordingly
+3. You must ensure production ready, professional, scalable and maintainable code
+4. You must ensure the website follows responsive design and works good in all screen
+5. Ensure the UX and UI follows latest standard and attractive (not pushy) to use

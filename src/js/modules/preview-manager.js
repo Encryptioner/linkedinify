@@ -98,7 +98,10 @@ export class PreviewManager extends EventEmitter {
       const preview = document.getElementById('linkedinPreview');
       
       if (preview) {
-        preview.classList.toggle('mobile-view', view === 'mobile');
+        // Remove existing view classes
+        preview.classList.remove('linkedin-mobile', 'linkedin-desktop');
+        // Add new view class
+        preview.classList.add(`linkedin-${view === 'mobile' ? 'mobile' : 'desktop'}`);
       }
 
       // Update button states
@@ -119,8 +122,9 @@ export class PreviewManager extends EventEmitter {
    * Set initial mode based on config
    */
   setInitialMode() {
-    this.setLinkedInTheme(Config.ui.preview.defaults.linkedinTheme);
-    this.setLinkedInView(Config.ui.preview.defaults.deviceView);
+    // Set default values if config not available
+    this.setLinkedInTheme('light');
+    this.setLinkedInView('web');
   }
 
   /**

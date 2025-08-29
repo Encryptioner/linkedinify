@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown to LinkedIn Converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0077b5 0%, #004182 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0077b5 0%, #004182 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 600px;
+        }
+
+        .input-section, .output-section {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-section {
+            border-right: 1px solid #e1e5e9;
+            background: #f8f9fa;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .markdown-input {
+            flex: 1;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .markdown-input:focus {
+            outline: none;
+            border-color: #0077b5;
+        }
+
+        .convert-btn {
+            background: linear-gradient(135deg, #0077b5 0%, #004182 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 119, 181, 0.3);
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 119, 181, 0.4);
+        }
+
+        .convert-btn:active {
+            transform: translateY(0);
+        }
+
+        .output-preview {
+            flex: 1;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 20px;
+            background: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            color: #2c3e50;
+        }
+
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        .copy-btn.copied {
+            background: #17a2b8;
+        }
+
+        .example-btn {
+            background: transparent;
+            color: #0077b5;
+            border: 2px solid #0077b5;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            align-self: flex-start;
+        }
+
+        .example-btn:hover {
+            background: #0077b5;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-section {
+                border-right: none;
+                border-bottom: 1px solid #e1e5e9;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .features {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .features h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .features ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .features li {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .features li:before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 Markdown to LinkedIn</h1>
+            <p>Convert your Markdown text to LinkedIn-ready formatted posts</p>
+        </div>
+        
+        <div class="content">
+            <div class="input-section">
+                <h2 class="section-title">✍️ Paste Your Markdown</h2>
+                <button class="example-btn" onclick="loadExample()">Load Example</button>
+                <textarea 
+                    class="markdown-input" 
+                    id="markdownInput" 
+                    placeholder="# Your Title Here
+
+## Key Points
+
+Here's some **bold text** and *italic text*.
+
+- First bullet point
+- Second bullet point
+- Third bullet point
+
+### Subheading
+
+> This is a quote that will stand out
+
+Check out this link: [LinkedIn](https://linkedin.com)
+
+**Call to action**: What do you think?"
+                ></textarea>
+                <button class="convert-btn" onclick="convertMarkdown()">🚀 Convert to LinkedIn Format</button>
+            </div>
+            
+            <div class="output-section">
+                <h2 class="section-title">✨ LinkedIn Preview</h2>
+                <div class="output-preview" id="outputPreview">Your converted LinkedIn post will appear here...</div>
+                <button class="copy-btn" id="copyBtn" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+            </div>
+        </div>
+
+        <div class="features">
+            <h3>🎯 Supported Features</h3>
+            <ul>
+                <li>Bold & Italic text</li>
+                <li>Headers (converted to styled text)</li>
+                <li>Code blocks with borders</li>
+                <li>Inline code formatting</li>
+                <li>Bullet points with Unicode</li>
+                <li>Blockquotes</li>
+                <li>Links (converted to readable format)</li>
+                <li>Line breaks & paragraphs</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function convertMarkdown() {
+            const input = document.getElementById('markdownInput').value;
+            const output = markdownToLinkedIn(input);
+            document.getElementById('outputPreview').textContent = output;
+        }
+
+        function markdownToLinkedIn(markdown) {
+            let result = markdown;
+
+            // Code blocks (```) - multi-line
+            result = result.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+                const langLabel = lang ? ` (${lang.toUpperCase()})` : '';
+                const lines = code.trim().split('\n');
+                const formattedCode = lines.map(line => `│ ${line}`).join('\n');
+                return `\n┌─── 💻 CODE${langLabel} ───\n${formattedCode}\n└${'─'.repeat(20)}\n`;
+            });
+
+            // Inline code (`code`) - single backticks
+            result = result.replace(/`([^`]+)`/g, '⟨ $1 ⟩');
+
+            // Headers - convert to bold with unicode styling
+            result = result.replace(/^### (.*$)/gm, '𝗦𝘂𝗯𝗵𝗲𝗮𝗱𝗶𝗻𝗴: $1\n');
+            result = result.replace(/^## (.*$)/gm, '𝗞𝗲𝘆 𝗣𝗼𝗶𝗻𝘁: $1\n');
+            result = result.replace(/^# (.*$)/gm, '𝗧𝗜𝗧𝗟𝗘: $1\n');
+
+            // Bold text - LinkedIn supports **text**
+            result = result.replace(/\*\*(.*?)\*\*/g, '𝗕𝗢𝗟𝗗: $1');
+
+            // Italic text - LinkedIn doesn't support italics, so we'll use emphasis
+            result = result.replace(/\*(.*?)\*/g, '📍 $1');
+
+            // Bullet points - convert to Unicode bullets
+            result = result.replace(/^- (.*$)/gm, '• $1');
+            result = result.replace(/^\* (.*$)/gm, '• $1');
+
+            // Numbered lists
+            let listCounter = 1;
+            result = result.replace(/^\d+\. (.*$)/gm, () => `${listCounter++}. $1`);
+
+            // Blockquotes
+            result = result.replace(/^> (.*$)/gm, '💭 "$1"');
+
+            // Links - convert [text](url) to "text: url"
+            result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '"$1": $2');
+
+            // Clean up extra line breaks
+            result = result.replace(/\n{3,}/g, '\n\n');
+
+            // Add some LinkedIn-friendly formatting
+            result = result.replace(/𝗕𝗢𝗟𝗗: /g, '');
+            result = result.replace(/\*\*(.*?)\*\*/g, '$1'); // Remove markdown bold syntax
+
+            // Actually apply bold formatting using Unicode
+            result = result.replace(/𝗕𝗢𝗟𝗗: (.*?)(?=\n|$)/g, (match, p1) => {
+                return p1.replace(/./g, char => {
+                    const boldMap = {
+                        'A': '𝐀', 'B': '𝐁', 'C': '𝐂', 'D': '𝐃', 'E': '𝐄', 'F': '𝐅', 'G': '𝐆', 'H': '𝐇', 'I': '𝐈', 'J': '𝐉',
+                        'K': '𝐊', 'L': '𝐋', 'M': '𝐌', 'N': '𝐍', 'O': '𝐎', 'P': '𝐏', 'Q': '𝐐', 'R': '𝐑', 'S': '𝐒', 'T': '𝐓',
+                        'U': '𝐔', 'V': '𝐕', 'W': '𝐖', 'X': '𝐗', 'Y': '𝐘', 'Z': '𝐙',
+                        'a': '𝐚', 'b': '𝐛', 'c': '𝐜', 'd': '𝐝', 'e': '𝐞', 'f': '𝐟', 'g': '𝐠', 'h': '𝐡', 'i': '𝐢', 'j': '𝐣',
+                        'k': '𝐤', 'l': '𝐥', 'm': '𝐦', 'n': '𝐧', 'o': '𝐨', 'p': '𝐩', 'q': '𝐪', 'r': '𝐫', 's': '𝐬', 't': '𝐭',
+                        'u': '𝐮', 'v': '𝐯', 'w': '𝐰', 'x': '𝐱', 'y': '𝐲', 'z': '𝐳',
+                        '0': '𝟎', '1': '𝟏', '2': '𝟐', '3': '𝟑', '4': '𝟒', '5': '𝟓', '6': '𝟔', '7': '𝟕', '8': '𝟖', '9': '𝟗'
+                    };
+                    return boldMap[char] || char;
+                });
+            });
+
+            return result.trim();
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('outputPreview').textContent;
+            navigator.clipboard.writeText(output).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function loadExample() {
+            const example = `# 🚀 Quick JavaScript Tips for Beginners
+
+## Essential concepts every developer should know
+
+Learning JavaScript can be *overwhelming*, but these **fundamentals** will get you started:
+
+### 1. Variables and Data Types
+
+\`\`\`javascript
+// Different ways to declare variables
+let name = "John";
+const age = 25;
+var isStudent = true;
+
+// Arrays and objects
+const fruits = ["apple", "banana", "orange"];
+const person = { name: "Jane", age: 30 };
+\`\`\`
+
+### 2. Functions
+
+- Use \`const\` for function expressions
+- Arrow functions: \`(param) => result\`
+- Regular functions: \`function myFunc() {}\`
+
+### 3. Common Methods
+
+\`\`\`javascript
+// Array methods
+fruits.push("grape");
+fruits.map(fruit => fruit.toUpperCase());
+
+// String methods  
+name.toLowerCase();
+name.includes("oh");
+\`\`\`
+
+> "The best way to learn programming is by writing programs." - Dennis Ritchie
+
+**Pro tip**: Practice with small projects and use \`console.log()\` to debug!
+
+Want more resources? Check out: [MDN JavaScript Guide](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide)
+
+**What's your favorite JavaScript trick?** Share below! 👇`;
+
+            document.getElementById('markdownInput').value = example;
+            convertMarkdown();
+        }
+
+        // Auto-convert on input
+        document.getElementById('markdownInput').addEventListener('input', convertMarkdown);
+
+        // Load example on page load
+        window.addEventListener('load', loadExample);
+    </script>
+</body>
+</html>

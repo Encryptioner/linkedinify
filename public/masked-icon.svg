@@ -1,0 +1,8 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Monochrome version for Safari pinned tabs -->
+  <rect x="128" y="128" width="256" height="256" fill="black" rx="20"/>
+  <rect x="160" y="180" width="192" height="16" fill="white" rx="8"/>
+  <rect x="160" y="220" width="192" height="16" fill="white" rx="8"/>
+  <rect x="160" y="260" width="192" height="16" fill="white" rx="8"/>
+  <rect x="160" y="300" width="128" height="16" fill="white" rx="8"/>
+</svg>
