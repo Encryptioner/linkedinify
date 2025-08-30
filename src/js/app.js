@@ -31,7 +31,7 @@ class LinkedInifyApp extends EventEmitter {
     this.modules = new Map();
     this.isInitialized = false;
     
-    this.logger.info('LinkedInify v2.0.0 initializing...');
+    this.logger.info('LinkedInify initializing...');
   }
 
   /**

@@ -1,8 +1,7 @@
-# LinkedInify v2.0 🚀
+# LinkedInify 🚀
 
 > **Transform your Markdown into LinkedIn-ready posts. Privacy-first, AI-powered, works everywhere.**
 
-[![Deploy to GitHub Pages](https://github.com/ankurmursalin/linkedinify/actions/workflows/deploy.yml/badge.svg)](https://github.com/ankurmursalin/linkedinify/actions/workflows/deploy.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
@@ -35,12 +34,12 @@
 ## 🚀 Quick Start
 
 ### Option 1: Use Online (Recommended)
-Visit **[LinkedInify.app](https://ankurmursalin.github.io/linkedinify)**
+Visit **[LinkedInify.app](https://encryptioner.github.io/linkedinify)**
 
 ### Option 2: Run Locally
 ```bash
 # Clone the repository
-git clone https://github.com/ankurmursalin/linkedinify.git
+git clone https://github.com/encryptioner/linkedinify.git
 cd linkedinify
 
 # Install dependencies
@@ -345,9 +344,9 @@ LinkedInify is built with privacy as the foundation:
 - **History not saving**: Check browser storage permissions
 
 ### Get Help
-- 📧 **Email**: [ankur@linkedinify.app](mailto:ankur@linkedinify.app)
-- 🐙 **GitHub Issues**: [Report bugs or request features](https://github.com/ankurmursalin/linkedinify/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/ankurmursalin/linkedinify/discussions)
+- 📧 **Email**: [mir.ankur.ruet13@gmail.com](mailto:mir.ankur.ruet13@gmail.com)
+- 🐙 **GitHub Issues**: [Report bugs or request features](https://github.com/encryptioner/linkedinify/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/encryptioner/linkedinify/discussions)
 
 ## 📄 License
 
@@ -365,13 +364,13 @@ See [LICENSE](LICENSE) file for details.
 
 ## 🚀 Roadmap
 
-### v2.1 (Next Release)
+### v2.0 (Next Release)
 - [ ] Export to other platforms (Twitter, Medium)
 - [ ] More content templates  
 - [ ] Advanced formatting options
 - [ ] Collaborative editing
 
-### v2.2 (Future)
+### v2.1 (Future)
 - [ ] Browser extension
 - [ ] Desktop application (Electron)
 - [ ] Plugin system
@@ -379,7 +378,20 @@ See [LICENSE](LICENSE) file for details.
 
 ---
 
-**Made with ❤️ by [Ankur Mursalin](https://github.com/ankurmursalin)**
+## 👨‍💻 Author
+1. Name: Ankur Mursalin
+2. Email: mir.ankur.ruet13@gmail.com
+3. Website: [https://encryptioner.github.io/](https://encryptioner.github.io/)
+4. LinkedIn: [https://www.linkedin.com/in/mir-mursalin-ankur](https://www.linkedin.com/in/mir-mursalin-ankur)
+5. Github: [https://github.com/encryptioner](https://github.com/encryptioner)
+6. Twitter: [https://x.com/AnkurMursalin](https://x.com/AnkurMursalin)
+7. Blog: [https://dev.to/mir_mursalin_ankur](https://dev.to/mir_mursalin_ankur)
+8. Nerddevs: [https://nerddevs.com/author/ankur/](https://nerddevs.com/author/ankur/)
+9. Project Home Page: [https://encryptioner.github.io/linkedinify](https://encryptioner.github.io/linkedinify)
+
+---
+
+**Made with ❤️ by [Ankur Mursalin](https://github.com/encryptioner)**
 
 *Empowering everyone to share their stories on LinkedIn beautifully*
 

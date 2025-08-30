@@ -10,11 +10,11 @@ export const Config = {
   // Application metadata
   app: {
     name: 'LinkedInify',
-    version: '2.0.0',
+    version: '1.0.0',
     description: 'Convert Markdown to LinkedIn posts offline. Privacy-first, AI-powered, and works everywhere.',
     author: 'Ankur Mursalin',
-    repository: 'https://github.com/ankurmursalin/linkedinify',
-    homepage: 'https://ankurmursalin.github.io/linkedinify',
+    repository: 'https://github.com/encryptioner/linkedinify',
+    homepage: 'https://ncryptioner.github.io/linkedinify',
   },
 
   // Environment settings

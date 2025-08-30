@@ -1,6 +1,6 @@
 {
   "name": "linkedinify",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "Convert Markdown to LinkedIn posts offline. Privacy-first, AI-powered, and works everywhere.",
   "main": "src/js/app.js",
   "type": "module",
@@ -32,18 +32,18 @@
   ],
   "author": {
     "name": "Ankur Mursalin",
-    "email": "ankur@linkedinify.app",
-    "url": "https://github.com/ankurmursalin"
+    "email": "mir.ankur.ruet13@gmail.com",
+    "url": "https://github.com/encryptioner"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ankurmursalin/linkedinify.git"
+    "url": "https://github.com/encryptioner/linkedinify.git"
   },
   "bugs": {
-    "url": "https://github.com/ankurmursalin/linkedinify/issues"
+    "url": "https://github.com/encryptioner/linkedinify/issues"
   },
-  "homepage": "https://ankurmursalin.github.io/linkedinify",
+  "homepage": "https://encryptioner.github.io/linkedinify",
   "devDependencies": {
     "@vitejs/plugin-legacy": "^4.1.1",
     "@vitest/ui": "^0.34.6",

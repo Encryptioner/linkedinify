@@ -274,7 +274,7 @@
    linkedinify/:1 Error while trying to use the following icon from the Manifest: http://localhost:3000/linkedinify/icons/icon-144x144.png (Download error or resource isn't a valid image)Understand this error
 
 
-## Instruction List 12
+## Instruction List 13
 
 ### Instructions
 1. The auto scroll jump issue on editor is still not solved
@@ -331,3 +331,13 @@
    logger.js:63 [2025-08-30T04:06:35.175Z] [DEBUG] [UIManager] Handling toolbar action: bold
    logger.js:63 [2025-08-30T04:06:35.179Z] [WARN] [MarkdownProcessor] Marked.js not available, returning plain text
 3. Ensure the code is production ready. It can be deployed as github pages and can be used as PWA
+
+### Comments
+1. The scroll jump issue is not fixed. I am skipping that for now
+
+## Instruction List 14
+
+### Instructions
+1. After running `pnpm dev`, when I go the the `http://localhost:3000/linkedinify/` url, it says no internet conenction. But the website is local. I need a command which will automatically show the changes in website when code is changed. And service worker and cache won't have effect on development. If I clear the cache/site data, the no internet message shows.
+2. The project loads at `http://localhost:3000/linkedinify/`. I don't want it to load at `/linkedinify/`. It should be load at `http://localhost:3000`. Update wherever necessary.
+3. I need way to easily change the port on which the project will run.
