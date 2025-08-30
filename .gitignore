@@ -1,2 +1,57 @@
-node_modules
-dist
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Environment Configuration
+.env
+.env.*
+!.env.example
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Claude
+.claude/*
+!.claude/*.example*
+
+# Cursor
+.cursor/*
+.cursorignore
+!.cursor/*.example*
+
+# VS Code
+.vscode/*
+!.vscode/*.example.json
+
+# Ignore multi-commit automation files (.ft Copilot)
+auto_commit_changes.sh
+auto_commit_plan.json
+auto_commit_prompt.md
+
+# testing
+/coverage
+
+# ngrok tunnel file
+config/tunnel.pid
+
+# Logs
+logs
+*.log
+
+# production
+/dist
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
