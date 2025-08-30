@@ -85,7 +85,6 @@ linkedinify/
 │   │   ├── config/           # Configuration
 │   │   └── app.js           # Main application
 │   ├── css/                 # Stylesheets
-│   ├── test/                # Test files
 │   └── index.html           # Main HTML
 ├── public/                  # Static assets
 ├── .github/workflows/       # CI/CD workflows
@@ -115,33 +114,12 @@ pnpm install
 # Start development server
 pnpm run dev
 
-# Run tests
-pnpm test
-
-# Run tests with UI
-pnpm run test:ui
-
 # Check code quality
 pnpm run lint
 pnpm run format
 
 # Build for production
 pnpm run build
-```
-
-### Testing
-```bash
-# Run all tests
-pnpm test
-
-# Run with coverage
-pnpm run test:coverage
-
-# Run specific test
-pnpm test -- theme-manager
-
-# Run tests in watch mode
-pnpm test -- --watch
 ```
 
 ### Code Quality
@@ -152,7 +130,7 @@ pnpm run lint
 # Format code
 pnpm run format
 
-# Full check (lint + test + build)
+# Full check (lint + build)
 pnpm run check
 ```
 
@@ -251,7 +229,6 @@ const { name, email, age } = user;
 The repository includes a complete GitHub Actions workflow (`.github/workflows/deploy.yml`) that:
 
 - ✅ Uses pnpm for fast, reliable builds
-- ✅ Runs full test suite before deployment  
 - ✅ Builds optimized production bundle
 - ✅ Deploys automatically on every push to main
 - ✅ Supports custom domains (configure in workflow)

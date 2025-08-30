@@ -25,9 +25,6 @@ pnpm install
 # Start development server (recommended)
 pnpm run dev
 
-# Run tests
-pnpm test
-
 # Build for production
 pnpm run build
 
@@ -55,7 +52,6 @@ The application uses a modern modular JavaScript architecture with separate file
 - **JavaScript modules** - ES6 modules in `src/js/modules/`
 - **Utilities** - Shared utilities in `src/js/utils/`
 - **Configuration** - App config in `src/js/config/`
-- **Tests** - Comprehensive test suite in `src/test/`
 
 ### Key JavaScript Modules
 - **ThemeManager** - Light/dark mode switching with system preference detection
@@ -92,7 +88,6 @@ linkedinify/
 │   │   └── utils/          # Shared utilities
 │   │       ├── event-emitter.js
 │   │       └── logger.js
-│   └── test/               # Test files
 ├── public/                 # Static assets (generated)
 ├── dist/                   # Build output
 ├── package.json           # pnpm package configuration

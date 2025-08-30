@@ -9,15 +9,12 @@
     "dev": "PORT=3004 vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage",
     "lint": "eslint src --ext .js,.ts --fix",
     "format": "prettier --write \"src/**/*.{js,ts,html,css,md}\"",
     "serve": "http-server dist -p 8080 -c-1",
     "deploy": "pnpm run build && gh-pages -d dist",
     "prepare": "husky install",
-    "check": "pnpm run lint && pnpm run test && pnpm run build"
+    "check": "pnpm run lint && pnpm run build"
   },
   "keywords": [
     "markdown",

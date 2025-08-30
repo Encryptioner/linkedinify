@@ -24,7 +24,7 @@
 
 ## Instruction List 3
 
-## Instructions
+### Instructions
 1. Use `pnpm` for the project. Add that in readme
 2. Getting below error when running the `pnpm dev` command
 ```bash
@@ -78,7 +78,6 @@
 5. When a text is selected and made bold or changed by `B` or other editing buttons, the input text of text area jumps to end of the text area on vertical scroll
 6. In browser tab of website favicon, when run `pnpm dev`, it doesn't show the icons
 
-
 ### Comments
 1. It couldn't solve the main issues. Linkedin preview is not ok
 2. And the UX & UI still looks odd. I am going to give it screenshot
@@ -101,7 +100,7 @@
 
 ## Instruction List 7
 
-## Instructions
+### Instructions
 1. Fix issues reminded earlier
 2. For linkedin preview. Example input:
    # 🚀 Quick JavaScript Tips for Beginners
@@ -144,7 +143,6 @@
    Except the `🚀 Quick JavaScript Tips for Beginners` should be bold like title and so on
 3. The new line also doesn't work. It is frustrating that, in very earlier raw versions of html, linkedin preview worked mostly ok. Make sure u fix this core feature 
 
-
 ### Comments
 1. Somehow better. However, still has issues
 2. Added command to update the ai-summaries
@@ -181,7 +179,6 @@
 2. I do not see any result on keyboard shortcut. Say, I've updated the text in editor. Now, I press `cmd + z`, it doesn't undo the change. Ensure the keyboard shortcut works and supports all major OS
 3. It would be good to have undo, redo button (should be disabled if not applicable) in editor
 
-
 ### Comments
 1. Started using `gemini-cli` from here as reached claude code's 5 hour limit
 2. Provided this instruction for it. `Follow the instructions of last instruction list after assessing this file @task-1-initial-setup-by-claude-code.md. For more instructions and project overview check Claude.md file`
@@ -190,6 +187,8 @@
 
 
 ## Instruction List 11
+
+### Instructions
 1. Making bold/italic etc doesn't work. It shows `Failed to apply`
 2. In the console this errors are present
    linkedinify/:47 <link rel=preload> has an unsupported `type` value
@@ -273,6 +272,9 @@
    icon-144x144.png:1  GET http://localhost:3000/linkedinify/icons/icon-144x144.png 404 (Not Found)Understand this error
    linkedinify/:1 Error while trying to use the following icon from the Manifest: http://localhost:3000/linkedinify/icons/icon-144x144.png (Download error or resource isn't a valid image)Understand this error
 
+### Comments
+1. Have to check
+
 
 ## Instruction List 13
 
@@ -341,3 +343,7 @@
 1. After running `pnpm dev`, when I go the the `http://localhost:3000/linkedinify/` url, it says no internet conenction. But the website is local. I need a command which will automatically show the changes in website when code is changed. And service worker and cache won't have effect on development. If I clear the cache/site data, the no internet message shows.
 2. The project loads at `http://localhost:3000/linkedinify/`. I don't want it to load at `/linkedinify/`. It should be load at `http://localhost:3000`. Update wherever necessary.
 3. I need way to easily change the port on which the project will run.
+
+### Comments
+1. This version is somehow ok
+2. After this, I manually updated some part

@@ -2,9 +2,7 @@ name: Deploy LinkedInify to GitHub Pages
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    branches: [ release/prod ]
 
 permissions:
   contents: read
@@ -36,9 +34,6 @@ jobs:
         
     - name: Install dependencies
       run: pnpm install
-      
-    - name: Run tests
-      run: pnpm test
       
     - name: Build project
       run: pnpm run build

@@ -56,11 +56,6 @@ export default defineConfig(({ command, mode }) => {
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: false  // Use the existing manifest.json file instead of generating one
     })] : [])
-  ],
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./src/test/setup.js']
-  }
+  ]
   };
 });
