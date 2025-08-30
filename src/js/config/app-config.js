@@ -152,8 +152,8 @@ export const Config = {
     backgroundColor: '#ffffff',
     display: 'standalone',
     orientation: 'portrait-primary',
-    scope: '/linkedinify/',
-    startUrl: '/linkedinify/',
+    scope: isProduction ? '/linkedinify/' : '/',
+    startUrl: isProduction ? '/linkedinify/' : '/',
   },
 
   // Monitoring and logging

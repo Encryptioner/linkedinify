@@ -13,17 +13,17 @@
   "categories": ["productivity", "social", "utilities"],
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     },
     {
-      "src": "/apple-touch-icon.png",
+      "src": "apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png"
     },
     {
-      "src": "/masked-icon.svg",
+      "src": "masked-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "maskable"
@@ -37,7 +37,7 @@
       "url": "/linkedinify/",
       "icons": [
         {
-          "src": "/favicon.svg",
+          "src": "favicon.svg",
           "sizes": "any",
           "type": "image/svg+xml"
         }
@@ -50,7 +50,7 @@
       "url": "/linkedinify/?example=true",
       "icons": [
         {
-          "src": "/favicon.svg",
+          "src": "favicon.svg",
           "sizes": "any",
           "type": "image/svg+xml"
         }

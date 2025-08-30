@@ -388,8 +388,10 @@ body {
   min-height: 70vh;
   max-width: 1400px;
   margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--spacing-lg);
-  padding: 0 var(--spacing-lg);
+  padding: var(--spacing-lg);
 }
 
 .input-section,
@@ -489,6 +491,7 @@ body {
 
 /* LinkedIn Preview Theming */
 .linkedin-preview {
+  min-height: 400px;
   white-space: pre-wrap;
   word-wrap: break-word;
 }
@@ -527,6 +530,7 @@ body {
 /* Input Elements */
 .markdown-input {
   width: 100%;
+  height: 100%;
   flex: 1;
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius-lg);
@@ -538,7 +542,7 @@ body {
   background: var(--background-primary);
   color: var(--text-primary);
   transition: all var(--transition-base);
-  min-height: 400px;
+  min-height: 525px;
 }
 
 .markdown-input:focus {
@@ -561,7 +565,8 @@ body {
   color: var(--text-primary);
   overflow-y: auto;
   line-height: 1.7;
-  min-height: 400px;
+  height: 420px;
+  max-height: 420px;
   transition: all var(--transition-base);
 }
 
@@ -627,6 +632,7 @@ body {
   flex-wrap: wrap;
 }
 
+.input-footer,
 .preview-footer {
   margin-top: var(--spacing-lg);
   display: flex;
@@ -1202,6 +1208,12 @@ kbd {
 /* Responsive Design */
 
 @media (max-width: 1200px) {
+  .main-content {
+    grid-template-columns: 1fr;
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+  }
+  
   .input-section,
   .preview-section {
     border-bottom: 1px solid var(--border-color);
@@ -1255,10 +1267,17 @@ kbd {
     font-size: var(--font-size-lg);
   }
 
-  .markdown-input,
+  .markdown-input {
+    min-height: 400px;
+    height: 400px;
+    max-height: 400px;
+    padding: var(--spacing-md);
+  }
+  
   .preview-area,
   .output-preview {
-    min-height: 300px;
+    height: 400px;
+    max-height: 400px;
     padding: var(--spacing-md);
   }
 

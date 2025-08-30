@@ -513,14 +513,34 @@ What's your biggest LinkedIn challenge? Drop it in the comments! 👇
    * Set up event listeners for history events
    */
   setupHistoryEventListeners() {
-    const editor = this.app.getModule('editor');
-    if (editor) {
-      editor.on('historyChanged', ({ canUndo, canRedo }) => {
-        const undoBtn = document.querySelector('.toolbar-btn[data-action="undo"]');
-        const redoBtn = document.querySelector('.toolbar-btn[data-action="redo"]');
-        if (undoBtn) undoBtn.disabled = !canUndo;
-        if (redoBtn) redoBtn.disabled = !canRedo;
-      });
+    try {
+      const editor = this.app.getModule('editor');
+      if (editor) {
+        editor.on('historyChanged', ({ canUndo, canRedo }) => {
+          const undoBtn = document.querySelector('.toolbar-btn[data-action="undo"]');
+          const redoBtn = document.querySelector('.toolbar-btn[data-action="redo"]');
+          if (undoBtn) undoBtn.disabled = !canUndo;
+          if (redoBtn) redoBtn.disabled = !canRedo;
+        });
+      }
+    } catch (error) {
+      // Editor module might not be initialized yet, set up later
+      this.logger.debug('Editor module not available during UI init, will retry later');
+      setTimeout(() => {
+        try {
+          const editor = this.app.getModule('editor');
+          if (editor) {
+            editor.on('historyChanged', ({ canUndo, canRedo }) => {
+              const undoBtn = document.querySelector('.toolbar-btn[data-action="undo"]');
+              const redoBtn = document.querySelector('.toolbar-btn[data-action="redo"]');
+              if (undoBtn) undoBtn.disabled = !canUndo;
+              if (redoBtn) redoBtn.disabled = !canRedo;
+            });
+          }
+        } catch (retryError) {
+          this.logger.warn('Could not set up editor history listeners:', retryError);
+        }
+      }, 100);
     }
   }
 

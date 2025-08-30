@@ -1,7 +1,7 @@
 # Task 1: Initial Setup by Claude Code - Instructions
 
 ## General Rules
-1. Write or update the summary of your updates in `ai-summaries/task-1-initial-setup.md` file when all the commanded tasks/instructions are done. Keep it short. Add summary of key files changed (with what functionality is changed there). You may update it in chronological way by step 1, step 2 and so on. It should reflect the continuos changes done on the codebase.
+1. Assess summary of your earlier tasks in `ai-summaries/task-1-initial-setup.md` file. And write or update the summary of your updates in that file when all the current commanded tasks/instructions are done. Keep it short. Include summary of key files changed (with info on functionality changed). You may update it in chronological way by step 1, step 2 and so on. It should reflect the continuos changes done on the codebase.
 
 
 ## Instruction List 1
@@ -337,6 +337,7 @@
 ### Comments
 1. The scroll jump issue is not fixed. I am skipping that for now
 
+
 ## Instruction List 14
 
 ### Instructions
@@ -347,3 +348,38 @@
 ### Comments
 1. This version is somehow ok
 2. After this, I manually updated some part
+
+
+## Instruction List 15
+
+### Instructions
+1. While deployment, got this error in github actions. Fix those errors. I am using `release/prod` as my deployment branch. In other repo, it works
+   1. deploy
+   Branch "release/prod" is not allowed to deploy to github-pages due to environment protection rules.
+   2. deploy
+   The deployment was rejected or didn't satisfy other protection rules.
+
+### Comments
+1. It did some unintended changes. However most of them are ok
+2. It updated the deployment branch. However, I gave another fix
+3. I also updated some style upon it's change
+
+
+## Instruction List 16
+
+### Instructions
+1. The linked and html preview grow indefinitely. it looks odd when markdown input is fixed height. If linkedin/html preview exceeds the height of markdown container, there should have vertical scroll in them. So, that it looks good.
+
+### Comments
+1. It did some changes in style. I've updated on top of that for better looking
+
+
+## Instruction List 17
+
+### Instructions
+1. After deployment most things woks ok. However, there is this error in console. My website is deployed in https://encryptioner.github.io/linkedinify/ now. However, it can be changed anytime. So, the solution needs to be dynamic
+   Failed to load resource: the server responded with a status of 404 ()Understand this error
+   linkedinify/:1 Error while trying to use the following icon from the Manifest: https://encryptioner.github.io/favicon.svg (Download error or resource isn't a valid image)
+
+### Comments
+1. It did update some url base path in manifest.json and vite.config.json. We may need to remove those, when we deploy it to any standalone domain
