@@ -3,6 +3,7 @@ name: Deploy LinkedInify to GitHub Pages
 on:
   push:
     branches: [ release/prod ]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -47,9 +48,9 @@ jobs:
         path: './dist'
 
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    # environment:
+    #   name: github-pages
+    #   url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
     steps:

@@ -53,8 +53,35 @@ export default defineConfig(({ command, mode }) => {
         navigateFallbackDenylist: [/^chrome-extension:\/\//, /^moz-extension:\/\//, /^webkit-extension:\/\//],
         dontCacheBustURLsMatching: /\.\w{8}\./
       },
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
-      manifest: false  // Use the existing manifest.json file instead of generating one
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg', 'favicon.svg'],
+      manifest: {
+        name: 'LinkedInify - Markdown to LinkedIn Converter',
+        short_name: 'LinkedInify',
+        description: 'Convert Markdown to LinkedIn posts offline. Privacy-first, AI-powered, and works everywhere.',
+        theme_color: '#0077b5',
+        background_color: '#ffffff',
+        display: 'standalone',
+        scope: '/',
+        start_url: '/',
+        icons: [
+          {
+            src: 'favicon.svg',
+            sizes: 'any',
+            type: 'image/svg+xml'
+          },
+          {
+            src: 'apple-touch-icon.png',
+            sizes: '180x180',
+            type: 'image/png'
+          },
+          {
+            src: 'masked-icon.svg',
+            sizes: 'any',
+            type: 'image/svg+xml',
+            purpose: 'maskable'
+          }
+        ]
+      }
     })] : [])
   ]
   };
