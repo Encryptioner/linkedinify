@@ -103,9 +103,8 @@ export class UIManager extends EventEmitter {
    */
   setupToolbarActions() {
     document.addEventListener('click', (event) => {
-      const target = event.target;
-      
-      if (target.matches('.toolbar-btn[data-action]')) {
+      const target = event.target.closest('.toolbar-btn[data-action]');
+      if (target) {
         event.preventDefault();
         this.handleToolbarAction(target.dataset.action);
       }
@@ -115,60 +114,50 @@ export class UIManager extends EventEmitter {
   /**
    * Handle toolbar button actions
    */
-  async handleToolbarAction(action) {
+  handleToolbarAction(action) {
     try {
       this.logger.debug(`Handling toolbar action: ${action}`);
-      
-      if (!this.app) {
-        this.logger.error('App instance not available');
-        return;
-      }
+      const editor = this.app.getModule('editor');
 
       switch (action) {
         case 'bold':
-          if (typeof this.app.formatText === 'function') {
-            await this.app.formatText('**', '**');
-          } else {
-            this.logger.error('app.formatText is not a function');
-          }
+          editor.formatText('**', '**');
           break;
         case 'italic':
-          if (typeof this.app.formatText === 'function') {
-            await this.app.formatText('*', '*');
-          } else {
-            this.logger.error('app.formatText is not a function');
-          }
+          editor.formatText('*', '*');
           break;
         case 'code':
-          if (typeof this.app.formatText === 'function') {
-            await this.app.formatText('`', '`');
-          } else {
-            this.logger.error('app.formatText is not a function');
-          }
+          editor.formatText('`', '`');
           break;
         case 'h1':
-          await this.formatHeading(1);
+          editor.formatText('# ', '');
           break;
         case 'h2':
-          await this.formatHeading(2);
+          editor.formatText('## ', '');
           break;
         case 'h3':
-          await this.formatHeading(3);
+          editor.formatText('### ', '');
           break;
         case 'ul':
-          await this.insertList('- ');
+          editor.formatText('- ', '');
           break;
         case 'ol':
-          await this.insertList('1. ');
+          editor.formatText('1. ', '');
           break;
         case 'quote':
-          await this.app.formatText('> ', '');
+          editor.formatText('> ', '');
           break;
         case 'codeblock':
-          await this.insertCodeBlock();
+          editor.formatText('```\n', '\n```');
           break;
         case 'link':
-          await this.insertLink();
+          editor.formatText('[', '](https://)');
+          break;
+        case 'undo':
+          editor.undo();
+          break;
+        case 'redo':
+          editor.redo();
           break;
         default:
           this.logger.warn(`Unknown toolbar action: ${action}`);
@@ -176,119 +165,6 @@ export class UIManager extends EventEmitter {
     } catch (error) {
       this.logger.error(`Failed to handle toolbar action ${action}:`, error);
       this.showStatus(`Failed to apply ${action} formatting`, 'error');
-    }
-  }
-
-  /**
-   * Format heading
-   */
-  async formatHeading(level) {
-    const prefix = '#'.repeat(level) + ' ';
-    const textarea = document.getElementById('markdownInput');
-    
-    if (!textarea) return;
-
-    const { selectionStart, selectionEnd, value } = textarea;
-    const selectedText = value.substring(selectionStart, selectionEnd);
-    const replacement = prefix + selectedText;
-    
-    textarea.value = 
-      value.substring(0, selectionStart) + 
-      replacement + 
-      value.substring(selectionEnd);
-    
-    textarea.focus();
-    textarea.setSelectionRange(
-      selectionStart + prefix.length, 
-      selectionStart + prefix.length + selectedText.length
-    );
-    
-    if (this.app.convertMarkdown) {
-      await this.app.convertMarkdown();
-    }
-  }
-
-  /**
-   * Insert list
-   */
-  async insertList(prefix) {
-    const textarea = document.getElementById('markdownInput');
-    if (!textarea) return;
-
-    const { selectionStart, value } = textarea;
-    const lines = value.split('\n');
-    let currentLine = 0;
-    let charCount = 0;
-    
-    // Find current line
-    for (let i = 0; i < lines.length; i++) {
-      if (charCount + lines[i].length >= selectionStart) {
-        currentLine = i;
-        break;
-      }
-      charCount += lines[i].length + 1;
-    }
-    
-    lines[currentLine] = prefix + lines[currentLine];
-    textarea.value = lines.join('\n');
-    textarea.focus();
-    
-    if (this.app.convertMarkdown) {
-      await this.app.convertMarkdown();
-    }
-  }
-
-  /**
-   * Insert code block
-   */
-  async insertCodeBlock() {
-    const textarea = document.getElementById('markdownInput');
-    if (!textarea) return;
-
-    const { selectionStart, selectionEnd, value } = textarea;
-    const selectedText = value.substring(selectionStart, selectionEnd);
-    const replacement = '```\n' + selectedText + '\n```';
-    
-    textarea.value = 
-      value.substring(0, selectionStart) + 
-      replacement + 
-      value.substring(selectionEnd);
-    
-    textarea.focus();
-    textarea.setSelectionRange(
-      selectionStart + 4, 
-      selectionStart + 4 + selectedText.length
-    );
-    
-    if (this.app.convertMarkdown) {
-      await this.app.convertMarkdown();
-    }
-  }
-
-  /**
-   * Insert link
-   */
-  async insertLink() {
-    const textarea = document.getElementById('markdownInput');
-    if (!textarea) return;
-
-    const { selectionStart, selectionEnd, value } = textarea;
-    const selectedText = value.substring(selectionStart, selectionEnd);
-    const replacement = `[${selectedText || 'link text'}](https://example.com)`;
-    
-    textarea.value = 
-      value.substring(0, selectionStart) + 
-      replacement + 
-      value.substring(selectionEnd);
-    
-    textarea.focus();
-    
-    if (!selectedText) {
-      textarea.setSelectionRange(selectionStart + 1, selectionStart + 10);
-    }
-    
-    if (this.app.convertMarkdown) {
-      await this.app.convertMarkdown();
     }
   }
 
@@ -313,11 +189,13 @@ Here's what successful professionals do differently:
 
 ### Pro Tip: Use Data
 
-\`\`\`javascript
+\ \
+javascript
 const engagement = posts.filter(post => 
     post.likes > 100 && post.comments > 10
 );
-\`\`\`
+\
+\
 
 **Ready to level up your LinkedIn game?**
 
@@ -635,30 +513,13 @@ What's your biggest LinkedIn challenge? Drop it in the comments! 👇
    * Set up event listeners for history events
    */
   setupHistoryEventListeners() {
-    if (this.app.modules?.has('history')) {
-      const historyModule = this.app.modules.get('history');
-      
-      // Listen for post not changed events
-      historyModule.on('postNotChanged', (data) => {
-        if (data.reason === 'No changes detected') {
-          this.showStatus('No changes to save', 'info', 2000);
-        } else if (data.reason === 'Duplicate post exists') {
-          this.showStatus('This post already exists in history', 'info', 3000);
-        }
-      });
-
-      // Listen for successful saves
-      historyModule.on('postSaved', (data) => {
-        this.showStatus(`Post saved: ${data.post.title}`, 'success', 3000);
-        // Update UI to reflect new state
-        this.updateUI();
-      });
-
-      // Listen for post loads
-      historyModule.on('postLoaded', (data) => {
-        this.showStatus(`Post loaded: ${data.post.title}`, 'success', 2000);
-        // Update UI to reflect new state
-        this.updateUI();
+    const editor = this.app.getModule('editor');
+    if (editor) {
+      editor.on('historyChanged', ({ canUndo, canRedo }) => {
+        const undoBtn = document.querySelector('.toolbar-btn[data-action="undo"]');
+        const redoBtn = document.querySelector('.toolbar-btn[data-action="redo"]');
+        if (undoBtn) undoBtn.disabled = !canUndo;
+        if (redoBtn) redoBtn.disabled = !canRedo;
       });
     }
   }

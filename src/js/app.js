@@ -16,6 +16,7 @@ import { UIManager } from './modules/ui-manager.js';
 import { KeyboardManager } from './modules/keyboard-manager.js';
 import { ClipboardManager } from './modules/clipboard-manager.js';
 import { ServiceWorkerManager } from './modules/service-worker-manager.js';
+import { EditorManager } from './modules/editor-manager.js';
 
 /**
  * Main Application Class
@@ -67,7 +68,7 @@ class LinkedInifyApp extends EventEmitter {
     const moduleConfigs = [
       ['serviceWorker', ServiceWorkerManager, { app: this }],
       ['theme', ThemeManager, { app: this }],
-      ['ui', UIManager, { app: this }],
+      ['editor', EditorManager, { app: this }],
       ['markdown', MarkdownProcessor, { app: this }],
       ['converter', ContentConverter, { app: this }],
       ['titleGenerator', TitleGenerator, { app: this }],
@@ -75,6 +76,7 @@ class LinkedInifyApp extends EventEmitter {
       ['history', HistoryManager, { app: this }],
       ['keyboard', KeyboardManager, { app: this }],
       ['clipboard', ClipboardManager, { app: this }],
+      ['ui', UIManager, { app: this }],
     ];
 
     for (const [name, ModuleClass, config] of moduleConfigs) {
@@ -178,39 +180,6 @@ class LinkedInifyApp extends EventEmitter {
       throw new Error(`Module not found: ${name}`);
     }
     return module;
-  }
-
-  /**
-   * Format selected text in the markdown input
-   */
-  async formatText(prefix, suffix = '') {
-    try {
-      const textarea = document.getElementById('markdownInput');
-      if (!textarea) {
-        throw new Error('Markdown input not found');
-      }
-
-      const { selectionStart, selectionEnd, value } = textarea;
-      const selectedText = value.substring(selectionStart, selectionEnd);
-      const replacement = prefix + selectedText + suffix;
-      
-      textarea.value = 
-        value.substring(0, selectionStart) + 
-        replacement + 
-        value.substring(selectionEnd);
-      
-      textarea.focus();
-      textarea.setSelectionRange(
-        selectionStart + prefix.length, 
-        selectionStart + prefix.length + selectedText.length
-      );
-      
-      await this.convertMarkdown();
-      
-    } catch (error) {
-      this.logger.error('Failed to format text:', error);
-      this.handleError(error);
-    }
   }
 
   /**

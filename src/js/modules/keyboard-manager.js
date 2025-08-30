@@ -14,6 +14,9 @@ export class KeyboardManager extends EventEmitter {
     this.logger = new Logger('KeyboardManager');
     this.shortcuts = new Map();
     this.isEnabled = true;
+    this.undoStack = [];
+    this.redoStack = [];
+    this.maxUndoSteps = 50;
   }
 
   /**
@@ -36,9 +39,14 @@ export class KeyboardManager extends EventEmitter {
    */
   setupShortcuts() {
     // Text formatting shortcuts
-    this.registerShortcut('Ctrl+B', () => this.app.formatText('**', '**'), 'Bold text');
-    this.registerShortcut('Ctrl+I', () => this.app.formatText('*', '*'), 'Italic text');
+    this.registerShortcut('Ctrl+B', () => this.app.getModule('editor').formatText('**', '**'), 'Bold text');
+    this.registerShortcut('Ctrl+I', () => this.app.getModule('editor').formatText('*', '*'), 'Italic text');
     this.registerShortcut('Ctrl+K', () => this.insertLink(), 'Insert link');
+    
+    // Undo/Redo shortcuts
+    this.registerShortcut('Ctrl+Z', () => this.app.getModule('editor').undo(), 'Undo');
+    this.registerShortcut('Ctrl+Y', () => this.app.getModule('editor').redo(), 'Redo');
+    this.registerShortcut('Ctrl+Shift+Z', () => this.app.getModule('editor').redo(), 'Redo (alternative)');
     
     // Document shortcuts
     this.registerShortcut('Ctrl+S', () => this.app.saveCurrentPost(), 'Save post');
@@ -63,7 +71,7 @@ export class KeyboardManager extends EventEmitter {
     this.registerShortcut('Ctrl+Shift+7', () => this.insertList('1. '), 'Numbered list');
     
     // Code shortcuts
-    this.registerShortcut('Ctrl+`', () => this.app.formatText('`', '`'), 'Inline code');
+    this.registerShortcut('Ctrl+`', () => this.app.getModule('editor').formatText('`', '`'), 'Inline code');
     this.registerShortcut('Ctrl+Shift+`', () => this.insertCodeBlock(), 'Code block');
   }
 
@@ -71,12 +79,14 @@ export class KeyboardManager extends EventEmitter {
    * Register a keyboard shortcut
    */
   registerShortcut(key, handler, description) {
-    const normalizedKey = this.normalizeKey(key);
-    
-    this.shortcuts.set(normalizedKey, {
-      handler,
-      description,
-      key: normalizedKey,
+    // Register both Ctrl (Windows/Linux) and Cmd (Mac) versions
+    const keys = this.normalizeKeyForPlatforms(key);
+    keys.forEach(normalizedKey => {
+      this.shortcuts.set(normalizedKey, {
+        handler,
+        description,
+        key: normalizedKey,
+      });
     });
     
     this.logger.debug(`Registered shortcut: ${key} - ${description}`);
@@ -173,7 +183,9 @@ export class KeyboardManager extends EventEmitter {
   getKeyCombo(event) {
     const parts = [];
     
-    if (event.ctrlKey || event.metaKey) parts.push('Ctrl');
+    // Handle Ctrl (Windows/Linux) and Cmd (Mac) separately
+    if (event.ctrlKey) parts.push('Ctrl');
+    else if (event.metaKey) parts.push('CMD');
     if (event.altKey) parts.push('Alt');
     if (event.shiftKey) parts.push('Shift');
     
@@ -208,6 +220,35 @@ export class KeyboardManager extends EventEmitter {
         return part.toUpperCase();
       })
       .join('+');
+  }
+
+  /**
+   * Normalize key for all platforms (Windows/Linux/Mac)
+   */
+  normalizeKeyForPlatforms(keyString) {
+    const keys = [];
+    
+    // If it's a Ctrl shortcut, add both Ctrl and Cmd versions
+    if (keyString.toLowerCase().includes('ctrl+')) {
+      // Add the original Ctrl version (Windows/Linux)
+      keys.push(this.normalizeKey(keyString));
+      
+      // Add the Cmd version (Mac) - replace Ctrl with Cmd
+      const cmdVersion = keyString.replace(/ctrl\+/i, 'Cmd+');
+      keys.push(this.normalizeKey(cmdVersion).replace('CTRL+', 'CMD+'));
+    } else if (keyString.toLowerCase().includes('cmd+')) {
+      // Add the original Cmd version (Mac) 
+      keys.push(this.normalizeKey(keyString).replace('CTRL+', 'CMD+'));
+      
+      // Add the Ctrl version (Windows/Linux)
+      const ctrlVersion = keyString.replace(/cmd\+/i, 'Ctrl+');
+      keys.push(this.normalizeKey(ctrlVersion));
+    } else {
+      // No modifier, just normalize normally
+      keys.push(this.normalizeKey(keyString));
+    }
+    
+    return keys;
   }
 
   /**

@@ -38,10 +38,16 @@ export class ContentConverter extends EventEmitter {
     try {
       let converted = markdown.trim();
 
-      // Convert headers using LinkedIn-style bold Unicode characters
-      converted = converted.replace(/^### (.*$)/gm, '𝗦𝘂𝗯𝗵𝗲𝗮𝗱𝗶𝗻𝗴: $1\n');
-      converted = converted.replace(/^## (.*$)/gm, '𝗞𝗲𝘆 𝗣𝗼𝗶𝗻𝘁: $1\n');
-      converted = converted.replace(/^# (.*$)/gm, '𝗧𝗜𝗧𝗟𝗘: $1\n');
+      // Convert headers to bold Unicode characters without labels
+      converted = converted.replace(/^### (.*$)/gm, (match, text) => {
+        return this.toBoldUnicode(text) + '\n';
+      });
+      converted = converted.replace(/^## (.*$)/gm, (match, text) => {
+        return this.toBoldUnicode(text) + '\n';
+      });
+      converted = converted.replace(/^# (.*$)/gm, (match, text) => {
+        return this.toBoldUnicode(text) + '\n';
+      });
 
       // Convert bold and italic with proper LinkedIn formatting
       converted = converted.replace(/\*\*\*(.*?)\*\*\*/g, '***$1***');
