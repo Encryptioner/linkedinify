@@ -189,7 +189,7 @@
 4. Then continued with `claude code` after limit is over
 
 
-## Instruction List 10
+## Instruction List 11
 1. Making bold/italic etc doesn't work. It shows `Failed to apply`
 2. In the console this errors are present
    linkedinify/:47 <link rel=preload> has an unsupported `type` value
@@ -238,3 +238,96 @@
 ### Comments
 1. The editor issue seems fixed
 
+
+## Instruction List 12
+
+### Instructions
+1. If the the editor text is long and there is vertical scrollbar in editor, on selection of text at top of the text, the editor jumps and takes to the last of the screen. That looks odd and bad UX. Fix it
+2. There is console errors:
+   Application initialization completed
+   client.ts:79 WebSocket connection to 'ws://localhost:3000/linkedinify/?token=gR6fM_2Ww7a4' failed: 
+   setupWebSocket @ client.ts:79
+   (anonymous) @ client.ts:69Understand this error
+   client.ts:79 WebSocket connection to 'ws://localhost:3000/linkedinify/?token=gR6fM_2Ww7a4' failed: 
+   setupWebSocket @ client.ts:79
+   fallback @ client.ts:44
+   (anonymous) @ client.ts:104Understand this error
+   sw.js:49 Uncaught (in promise) TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
+      at sw.js:49:23
+   (anonymous) @ sw.js:49
+   Promise.then
+   (anonymous) @ sw.js:48
+   Promise.then
+   (anonymous) @ sw.js:43
+   Promise.then
+   (anonymous) @ sw.js:41Understand this error
+   hook.js:608 [vite] failed to connect to websocket.
+   your current setup:
+   (browser) localhost:3000/linkedinify/ <--[HTTP]--> localhost:3000/linkedinify/ (server)
+   (browser) localhost:3000/linkedinify/ <--[WebSocket (failing)]--> localhost:3000/linkedinify/ (server)
+   Check out your Vite / network configuration and https://vitejs.dev/config/server-options.html#server-hmr .
+   overrideMethod @ hook.js:608
+   (anonymous) @ client.ts:49
+   (anonymous) @ client.ts:104Understand this error
+   linkedinify/:448 LinkedInify loaded in 198.00ms
+   icon-144x144.png:1  GET http://localhost:3000/linkedinify/icons/icon-144x144.png 404 (Not Found)Understand this error
+   linkedinify/:1 Error while trying to use the following icon from the Manifest: http://localhost:3000/linkedinify/icons/icon-144x144.png (Download error or resource isn't a valid image)Understand this error
+
+
+## Instruction List 12
+
+### Instructions
+1. The auto scroll jump issue on editor is still not solved
+2. There is error in console. Please fix those:
+   client.ts:79 WebSocket connection to 'ws://localhost:3000/linkedinify/?token=gR6fM_2Ww7a4' failed: 
+   setupWebSocket @ client.ts:79
+   fallback @ client.ts:44
+   (anonymous) @ client.ts:104Understand this error
+   hook.js:608 [vite] failed to connect to websocket.
+   your current setup:
+   (browser) localhost:3000/linkedinify/ <--[HTTP]--> localhost:3000/linkedinify/ (server)
+   (browser) localhost:3000/linkedinify/ <--[WebSocket (failing)]--> localhost:3000/linkedinify/ (server)
+   Check out your Vite / network configuration and https://vitejs.dev/config/server-options.html#server-hmr .
+   overrideMethod @ hook.js:608
+   (anonymous) @ client.ts:49
+   (anonymous) @ client.ts:104Understand this error
+   sw.js:49 Uncaught (in promise) TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
+      at sw.js:49:23
+   (anonymous) @ sw.js:49
+   Promise.then
+   (anonymous) @ sw.js:48
+   Promise.then
+   (anonymous) @ sw.js:43
+   Promise.then
+   (anonymous) @ sw.js:41Understand this error
+   linkedinify/:448 LinkedInify loaded in 293.00ms
+   The FetchEvent for "http://localhost:3000/linkedinify/icons/icon-144x144.png" resulted in a network error response: the promise was rejected.
+   Promise.then
+   (anonymous) @ sw.js:39Understand this warning
+   2sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+   Promise.then
+   (anonymous) @ sw.js:39Understand this error
+   linkedinify/icons/icon-144x144.png:1  GET http://localhost:3000/linkedinify/icons/icon-144x144.png net::ERR_FAILEDUnderstand this error
+   linkedinify/:1 Error while trying to use the following icon from the Manifest: http://localhost:3000/linkedinify/icons/icon-144x144.png (Download error or resource isn't a valid image)Understand this error
+   7sw.js:49 Uncaught (in promise) TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
+      at sw.js:49:23
+   (anonymous) @ sw.js:49
+   Promise.then
+   (anonymous) @ sw.js:48
+   Promise.then
+   (anonymous) @ sw.js:43
+   Promise.then
+   (anonymous) @ sw.js:41Understand this error
+   logger.js:63 [2025-08-30T04:06:27.623Z] [WARN] [MarkdownProcessor] Marked.js not available, returning plain text
+   7sw.js:49 Uncaught (in promise) TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
+      at sw.js:49:23
+   (anonymous) @ sw.js:49
+   Promise.then
+   (anonymous) @ sw.js:48
+   Promise.then
+   (anonymous) @ sw.js:43
+   Promise.then
+   (anonymous) @ sw.js:41Understand this error
+   logger.js:63 [2025-08-30T04:06:35.175Z] [DEBUG] [UIManager] Handling toolbar action: bold
+   logger.js:63 [2025-08-30T04:06:35.179Z] [WARN] [MarkdownProcessor] Marked.js not available, returning plain text
+3. Ensure the code is production ready. It can be deployed as github pages and can be used as PWA

@@ -6,6 +6,7 @@
 import { EventEmitter } from '../utils/event-emitter.js';
 import { Logger } from '../utils/logger.js';
 import { Config } from '../config/app-config.js';
+import { marked } from 'marked';
 
 export class MarkdownProcessor extends EventEmitter {
   constructor({ app }) {
@@ -50,7 +51,7 @@ export class MarkdownProcessor extends EventEmitter {
     }
 
     try {
-      if (typeof marked === 'undefined') {
+      if (!marked) {
         this.logger.warn('Marked.js not available, returning plain text');
         return this.fallbackHtmlConversion(markdown);
       }

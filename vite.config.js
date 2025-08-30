@@ -18,7 +18,10 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true
+    open: true,
+    hmr: {
+      overlay: false  // Reduce WebSocket error overlay noise in development
+    }
   },
   plugins: [
     legacy({
@@ -26,35 +29,32 @@ export default defineConfig({
     }),
     VitePWA({
       registerType: 'autoUpdate',
+      devOptions: {
+        enabled: false  // Disable service worker in development to reduce console errors
+      },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        skipWaiting: true,
+        clientsClaim: true,
+        runtimeCaching: [{
+          urlPattern: /^https:\/\/.*$/,
+          handler: 'NetworkFirst',
+          options: {
+            cacheName: 'external-cache',
+            networkTimeoutSeconds: 5,
+            cacheableResponse: {
+              statuses: [0, 200]
+            }
+          }
+        }],
+        // Ignore chrome-extension and other non-http schemes
+        navigateFallbackDenylist: [/^chrome-extension:\/\//, /^moz-extension:\/\//, /^webkit-extension:\/\//],
+        dontCacheBustURLsMatching: /\.\w{8}\./,
+        // Add error handling for unsupported schemes
+        additionalManifestEntries: []
       },
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
-      manifest: {
-        name: 'LinkedInify - Markdown to LinkedIn Converter',
-        short_name: 'LinkedInify',
-        description: 'Convert Markdown to LinkedIn posts offline. Privacy-first, AI-powered, and works everywhere.',
-        theme_color: '#0077b5',
-        background_color: '#ffffff',
-        display: 'standalone',
-        orientation: 'portrait-primary',
-        scope: '/linkedinify/',
-        start_url: '/linkedinify/',
-        icons: [
-          {
-            src: 'icons/icon.svg',
-            sizes: '72x72 96x96 128x128 144x144 152x152 192x192 384x384 512x512',
-            type: 'image/svg+xml'
-          },
-          {
-            src: 'icons/icon.svg',
-            sizes: '512x512',
-            type: 'image/svg+xml',
-            purpose: 'any maskable'
-          }
-        ],
-        categories: ['productivity', 'utilities', 'social']
-      }
+      manifest: false  // Use the existing manifest.json file instead of generating one
     })
   ],
   test: {

@@ -13,103 +13,57 @@
   "categories": ["productivity", "social", "utilities"],
   "icons": [
     {
-      "src": "/linkedinify/icons/icon-16x16.png",
-      "sizes": "16x16",
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
       "type": "image/png"
     },
     {
-      "src": "/linkedinify/icons/icon-32x32.png",
-      "sizes": "32x32",
-      "type": "image/png"
-    },
-    {
-      "src": "/linkedinify/icons/icon-48x48.png",
-      "sizes": "48x48",
-      "type": "image/png"
-    },
-    {
-      "src": "/linkedinify/icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png"
-    },
-    {
-      "src": "/linkedinify/icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png"
-    },
-    {
-      "src": "/linkedinify/icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png"
-    },
-    {
-      "src": "/linkedinify/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/linkedinify/icons/icon-256x256.png",
-      "sizes": "256x256",
-      "type": "image/png"
-    },
-    {
-      "src": "/linkedinify/icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png"
-    },
-    {
-      "src": "/linkedinify/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/linkedinify/screenshots/desktop.png",
-      "sizes": "1280x800",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Desktop view of LinkedInify"
-    },
-    {
-      "src": "/linkedinify/screenshots/mobile.png",
-      "sizes": "375x812",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Mobile view of LinkedInify"
+      "src": "/masked-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
     {
-      "name": "Create New Post",
-      "short_name": "New Post",
-      "description": "Start writing a new LinkedIn post",
-      "url": "/linkedinify/?action=new",
+      "name": "New Post",
+      "short_name": "New",
+      "description": "Create a new LinkedIn post",
+      "url": "/linkedinify/",
       "icons": [
         {
-          "src": "/linkedinify/icons/shortcut-new.png",
-          "sizes": "96x96"
+          "src": "/favicon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
         }
       ]
     },
     {
-      "name": "Post History",
-      "short_name": "History",
-      "description": "View saved posts",
-      "url": "/linkedinify/?action=history",
+      "name": "Load Example",
+      "short_name": "Example",
+      "description": "Load example content",
+      "url": "/linkedinify/?example=true",
       "icons": [
         {
-          "src": "/linkedinify/icons/shortcut-history.png",
-          "sizes": "96x96"
+          "src": "/favicon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
         }
       ]
     }
   ],
-  "related_applications": [],
-  "prefer_related_applications": false,
-  "edge_side_panel": {
-    "preferred_width": 400
+  "share_target": {
+    "action": "/linkedinify/",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
   }
 }

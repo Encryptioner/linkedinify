@@ -84,14 +84,28 @@ export class EditorManager extends EventEmitter {
     const afterText = value.substring(selectionEnd);
     const newText = `${prefix}${selectedText}${suffix}`;
     
+    // Store scroll position and focus state before making changes
+    const scrollTop = this.textarea.scrollTop;
+    const hadFocus = document.activeElement === this.textarea;
+    
     this.textarea.value = beforeText + newText + afterText;
     
-    // Set cursor position
+    // Set cursor position without causing scroll jump
     const newCursorStart = selectionStart + prefix.length;
     const newCursorEnd = newCursorStart + selectedText.length;
     
-    this.textarea.focus();
+    // Restore scroll position BEFORE setting selection to prevent jumping
+    this.textarea.scrollTop = scrollTop;
+    
+    if (hadFocus) {
+      this.textarea.focus();
+    }
     this.textarea.setSelectionRange(newCursorStart, newCursorEnd);
+    
+    // Ensure scroll position is maintained after selection
+    requestAnimationFrame(() => {
+      this.textarea.scrollTop = scrollTop;
+    });
     
     // Trigger markdown conversion
     if (this.app.convertMarkdown) {
