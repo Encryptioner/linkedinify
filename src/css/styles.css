@@ -155,7 +155,7 @@ body {
 
 /* Container */
 .container {
-  max-width: 1536px;
+  max-width: 1400px;
   margin: 0 auto;
   background: var(--background-primary);
   min-height: 100vh;
@@ -386,7 +386,7 @@ body {
 /* Main Content */
 .main-content {
   min-height: 70vh;
-  max-width: 1536px;
+  max-width: 1400px;
   margin: 0 auto;
   gap: var(--spacing-lg);
   padding: 0 var(--spacing-lg);

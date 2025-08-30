@@ -190,11 +190,11 @@ Here's what successful professionals do differently:
 ### Pro Tip: Use Data
 
 \ \
-javascript
+\`\`\`javascript
 const engagement = posts.filter(post => 
     post.likes > 100 && post.comments > 10
 );
-\
+\`\`\`\
 \
 
 **Ready to level up your LinkedIn game?**
