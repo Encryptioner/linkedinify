@@ -61,8 +61,8 @@ export default defineConfig(({ command, mode }) => {
         theme_color: '#0077b5',
         background_color: '#ffffff',
         display: 'standalone',
-        scope: '/',
-        start_url: '/',
+        scope: isProduction ? '/linkedinify/' : '/',
+        start_url: isProduction ? '/linkedinify/' : '/',
         icons: [
           {
             src: 'favicon.svg',

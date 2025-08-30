@@ -372,3 +372,14 @@
 
 ### Comments
 1. It did some changes in style. I've updated on top of that for better looking
+
+
+## Instruction List 17
+
+### Instructions
+1. After deployment most things woks ok. However, there is this error in console. My website is deployed in https://encryptioner.github.io/linkedinify/ now. However, it can be changed anytime. So, the solution needs to be dynamic
+   Failed to load resource: the server responded with a status of 404 ()Understand this error
+   linkedinify/:1 Error while trying to use the following icon from the Manifest: https://encryptioner.github.io/favicon.svg (Download error or resource isn't a valid image)
+
+### Comments
+1. It did update some url base path in manifest.json and vite.config.json. We may need to remove those, when we deploy it to any standalone domain
