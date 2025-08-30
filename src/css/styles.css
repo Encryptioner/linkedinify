@@ -489,6 +489,12 @@ body {
   color: var(--text-secondary);
 }
 
+/* HTML Preview Theming */
+.html-preview {
+  min-height: 400px;
+}
+
+
 /* LinkedIn Preview Theming */
 .linkedin-preview {
   min-height: 400px;

@@ -383,3 +383,4 @@
 
 ### Comments
 1. It did update some url base path in manifest.json and vite.config.json. We may need to remove those, when we deploy it to any standalone domain
+2. It couldn't be installed as PWA app from chrome browser. However, offline version works
