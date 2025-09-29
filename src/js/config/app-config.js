@@ -177,6 +177,20 @@ export const Config = {
     mockData: isDevelopment,
     skipServiceWorker: isDevelopment,
   },
+
+  // AI Chat Integration
+  aiChat: {
+    enabled: true, // Set to false to disable chat widget
+    embedScriptUrl: 'https://encryptioner.github.io/private-chat/embed.js',
+    systemMessage: `
+      You are a helpful assistant for LinkedInify, a privacy-first markdown to LinkedIn post converter.
+      You can help users understand how to convert their markdown content to LinkedIn-ready posts.
+      Be friendly, professional, and concise in your responses.
+      Focus on helping users format their content effectively for LinkedIn.
+    `.replace(/\n/g, ' ').trim(),
+    fallbackEnabled: true, // Try to load script without parameters if initial load fails
+    debug: isDevelopment, // Enable debug logging in development
+  },
 };
 
 // Environment-specific overrides

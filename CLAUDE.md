@@ -63,6 +63,7 @@ The application uses a modern modular JavaScript architecture with separate file
 - **KeyboardManager** - Keyboard shortcuts and accessibility
 - **UIManager** - General UI interactions and status management
 - **ServiceWorkerManager** - PWA offline functionality and updates
+- **AIChatManager** - AI chatbot integration with dynamic script loading
 
 ### File Structure
 ```
@@ -88,6 +89,8 @@ linkedinify/
 │   │   └── utils/          # Shared utilities
 │   │       ├── event-emitter.js
 │   │       └── logger.js
+│   │   └── modules/        # Feature modules (continued)
+│   │       └── ai-chat-manager.js
 ├── public/                 # Static assets (generated)
 ├── dist/                   # Build output
 ├── package.json           # pnpm package configuration
@@ -205,6 +208,78 @@ export class NewModule extends EventEmitter {
 2. Upload contents of `dist/` folder to your hosting provider
 3. Ensure HTTPS is enabled for PWA functionality
 4. Configure server to serve service worker with correct MIME type
+
+## AI Chat Integration
+
+LinkedInify includes a pluggable AI chatbot that provides interactive assistance to users. The chatbot is powered by an external script from the `private-chat` project and integrates seamlessly with the modular architecture.
+
+### Configuration
+
+**AI Chat Settings** in `src/js/config/app-config.js`:
+```javascript
+aiChat: {
+  enabled: true, // Set to false to disable chat widget
+  embedScriptUrl: 'https://encryptioner.github.io/private-chat/embed.js',
+  systemMessage: '...', // Customizable system prompt
+  fallbackEnabled: true, // Try to load without parameters if initial load fails
+  debug: isDevelopment, // Enable debug logging in development
+}
+```
+
+### Architecture
+
+**AIChatManager Module** (`src/js/modules/ai-chat-manager.js`):
+- Follows the established EventEmitter pattern
+- Integrates with the application lifecycle
+- Provides comprehensive error handling and fallback mechanisms
+- Supports dynamic configuration and health checking
+
+**Key Features**:
+- **Dynamic Script Loading**: Loads the chat embed script with proper error handling
+- **URL Parameter Building**: Automatically configures system message and domain
+- **Fallback Support**: Attempts to load script without parameters if initial load fails
+- **Environment Detection**: Different behavior for development vs production
+- **Health Monitoring**: Provides status information for debugging
+- **Cleanup Management**: Proper resource cleanup on application shutdown
+
+### How It Works
+
+1. **Initialization**: AIChatManager is initialized as part of the main application startup
+2. **Script Loading**: Dynamically injects the chat embed script with proper configuration
+3. **Configuration**: Passes system message and domain information via URL parameters
+4. **Error Handling**: Provides fallback loading and comprehensive error logging
+5. **Integration**: Works seamlessly with other modules through the EventEmitter pattern
+
+### Customization
+
+To customize the AI chatbot:
+
+1. **System Message**: Edit `aiChat.systemMessage` in `app-config.js`
+2. **Enable/Disable**: Set `aiChat.enabled` to `false` to disable the widget
+3. **Script URL**: Update `aiChat.embedScriptUrl` for different chat service endpoints
+4. **Debug Mode**: Enable/disable debug logging with `aiChat.debug`
+
+### Module Lifecycle
+
+```javascript
+// Initialization (automatic)
+app.getModule('aiChat').init()
+
+// Health checking
+app.getModule('aiChat').isHealthy()
+
+// Manual control (if needed)
+app.getModule('aiChat').enable()
+app.getModule('aiChat').disable()
+app.getModule('aiChat').reload()
+```
+
+### Dependencies
+
+- Requires the `private-chat` project to be deployed and accessible
+- Uses the established EventEmitter and Logger utilities
+- No additional npm dependencies required
+- Integrates with the existing configuration system
 
 ## General Rules
 1. Be concise and accurate

@@ -17,6 +17,7 @@ import { KeyboardManager } from './modules/keyboard-manager.js';
 import { ClipboardManager } from './modules/clipboard-manager.js';
 import { ServiceWorkerManager } from './modules/service-worker-manager.js';
 import { EditorManager } from './modules/editor-manager.js';
+import { AIChatManager } from './modules/ai-chat-manager.js';
 
 /**
  * Main Application Class
@@ -77,6 +78,7 @@ class LinkedInifyApp extends EventEmitter {
       ['keyboard', KeyboardManager, { app: this }],
       ['clipboard', ClipboardManager, { app: this }],
       ['ui', UIManager, { app: this }],
+      ['aiChat', AIChatManager, { app: this }],
     ];
 
     for (const [name, ModuleClass, config] of moduleConfigs) {
