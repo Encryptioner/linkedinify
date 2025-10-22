@@ -191,6 +191,34 @@ export const Config = {
     fallbackEnabled: true, // Try to load script without parameters if initial load fails
     debug: isDevelopment, // Enable debug logging in development
   },
+
+  // Google Analytics Configuration
+  googleAnalytics: {
+    /**
+     * Your Google Analytics 4 Measurement ID
+     * Format: G-XXXXXXXXXX
+     *
+     * Get it from:
+     * - Go to https://analytics.google.com/
+     * - Admin > Data Streams > Your Stream
+     * - Copy the Measurement ID
+     */
+    measurementId: 'G-XXXXXXXXXX', // Replace with your GA4 Measurement ID
+
+    /**
+     * Enable/disable Google Analytics
+     * Set to false to disable all tracking
+     * Privacy-first: disabled by default
+     */
+    enabled: false, // Set to true when you add your measurement ID
+
+    /**
+     * Track in development environment
+     * Set to true if you want to test analytics locally
+     * Default: false (only track in production)
+     */
+    trackInDevelopment: false,
+  },
 };
 
 // Environment-specific overrides

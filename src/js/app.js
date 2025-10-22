@@ -18,6 +18,7 @@ import { ClipboardManager } from './modules/clipboard-manager.js';
 import { ServiceWorkerManager } from './modules/service-worker-manager.js';
 import { EditorManager } from './modules/editor-manager.js';
 import { AIChatManager } from './modules/ai-chat-manager.js';
+import { AnalyticsManager } from './modules/analytics-manager.js';
 
 /**
  * Main Application Class
@@ -68,6 +69,7 @@ class LinkedInifyApp extends EventEmitter {
   async initializeModules() {
     const moduleConfigs = [
       ['serviceWorker', ServiceWorkerManager, { app: this }],
+      ['analytics', AnalyticsManager, { app: this }],
       ['theme', ThemeManager, { app: this }],
       ['editor', EditorManager, { app: this }],
       ['markdown', MarkdownProcessor, { app: this }],
