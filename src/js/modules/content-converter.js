@@ -119,10 +119,18 @@ export class ContentConverter extends EventEmitter {
 
   /**
    * Convert text to bold Unicode characters for LinkedIn
-   * Clean approach: Latin gets Unicode bold, non-Latin stays plain
+   * - Latin script: Uses mathematical bold alphanumeric symbols (perfect for LinkedIn/Facebook)
+   * - Non-Latin script: Keeps text plain (no reliable bold method exists)
+   *
+   * Note: Unicode mathematical bold characters only exist for Latin script.
+   * For other scripts (Bangla, Arabic, etc.), there is no Unicode bold equivalent
+   * that works reliably on LinkedIn/Facebook.
+   *
+   * Solution: Convert Latin to mathematical bold, keep non-Latin as-is.
    */
   toBoldUnicode(text) {
-    const boldMap = {
+    // Mathematical Bold Latin (U+1D5D4 to U+1D5FF range)
+    const boldLatinMap = {
       'A': '𝗔', 'B': '𝗕', 'C': '𝗖', 'D': '𝗗', 'E': '𝗘', 'F': '𝗙', 'G': '𝗚', 'H': '𝗛', 'I': '𝗜',
       'J': '𝗝', 'K': '𝗞', 'L': '𝗟', 'M': '𝗠', 'N': '𝗡', 'O': '𝗢', 'P': '𝗣', 'Q': '𝗤', 'R': '𝗥',
       'S': '𝗦', 'T': '𝗧', 'U': '𝗨', 'V': '𝗩', 'W': '𝗪', 'X': '𝗫', 'Y': '𝗬', 'Z': '𝗭',
@@ -132,17 +140,24 @@ export class ContentConverter extends EventEmitter {
       '0': '𝟬', '1': '𝟭', '2': '𝟮', '3': '𝟯', '4': '𝟰', '5': '𝟱', '6': '𝟲', '7': '𝟳', '8': '𝟴', '9': '𝟵'
     };
 
-    // Convert Latin characters to bold Unicode, keep non-Latin characters as-is
-    // This creates clean output: "𝗘𝗻𝗴𝗹𝗶𝘀𝗵 and বাংলা" instead of cluttered emoji markers
-    return text.split('').map(char => boldMap[char] || char).join('');
+    // Convert Latin characters to mathematical bold, keep non-Latin as-is
+    return text.split('').map(char => boldLatinMap[char] || char).join('');
   }
 
   /**
    * Convert text to italic Unicode characters for LinkedIn
-   * Uses Mathematical Italic Unicode characters for Latin script
+   * - Latin script: Uses mathematical italic alphanumeric symbols (perfect for LinkedIn/Facebook)
+   * - Non-Latin script: Keeps text plain (no reliable italic method exists)
+   *
+   * Note: Similar to bold, mathematical italic characters only exist for Latin script.
+   * For other scripts (Bangla, Arabic, etc.), combining characters don't work reliably
+   * on LinkedIn/Facebook (they show as boxes or get stripped).
+   *
+   * Solution: Keep non-Latin text plain for italic (visual markers too intrusive for italic)
    */
   toItalicUnicode(text) {
-    const italicMap = {
+    // Mathematical Italic Latin (U+1D434 to U+1D4FF range)
+    const italicLatinMap = {
       'A': '𝐴', 'B': '𝐵', 'C': '𝐶', 'D': '𝐷', 'E': '𝐸', 'F': '𝐹', 'G': '𝐺', 'H': '𝐻', 'I': '𝐼',
       'J': '𝐽', 'K': '𝐾', 'L': '𝐿', 'M': '𝑀', 'N': '𝑁', 'O': '𝑂', 'P': '𝑃', 'Q': '𝑄', 'R': '𝑅',
       'S': '𝑆', 'T': '𝑇', 'U': '𝑈', 'V': '𝑉', 'W': '𝑊', 'X': '𝑋', 'Y': '𝑌', 'Z': '𝑍',
@@ -151,8 +166,9 @@ export class ContentConverter extends EventEmitter {
       's': '𝑠', 't': '𝑡', 'u': '𝑢', 'v': '𝑣', 'w': '𝑤', 'x': '𝑥', 'y': '𝑦', 'z': '𝑧'
     };
 
-    // Convert Latin characters to italic Unicode, keep non-Latin characters as-is
-    return text.split('').map(char => italicMap[char] || char).join('');
+    // For italic, we simply convert Latin to mathematical italic
+    // and keep everything else as-is (no visual markers for italic)
+    return text.split('').map(char => italicLatinMap[char] || char).join('');
   }
 
   /**
