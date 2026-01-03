@@ -208,7 +208,10 @@ class LinkedInifyApp extends EventEmitter {
       // Process LinkedIn preview
       const linkedinContent = await this.modules.get('converter').markdownToLinkedIn(markdown);
       linkedinPreview.textContent = linkedinContent;
-      
+
+      // Update character count indicator
+      this.modules.get('ui').updateCharacterCount();
+
       // Auto-save
       this.modules.get('history').autoSave(markdown);
       

@@ -164,13 +164,16 @@ Perfect for ANY topic - business, personal stories, tutorials, announcements, or
                         aria-label="Markdown input"
                     ></textarea>
                 </div>
-                
+
                 <div class="input-footer">
-                    <button class="convert-btn" id="convertBtn">🚀 Make LinkedIn Ready</button>
+                    <div class="pro-tips-compact" id="proTipsCompact">
+                        <span class="tip-badge">💡</span>
+                        <span class="tip-text" id="tipText">Paste from anywhere - auto-converts to Markdown!</span>
+                    </div>
                     <div id="status" class="status" role="status" aria-live="polite"></div>
                 </div>
             </section>
-            
+
             <!-- Preview Section -->
             <section class="preview-section">
                 <div class="section-header">
@@ -180,7 +183,7 @@ Perfect for ANY topic - business, personal stories, tutorials, announcements, or
                         <button class="tab-btn" data-tab="html" aria-label="HTML preview">🌐 HTML Preview</button>
                     </div>
                 </div>
-                
+
                 <div class="preview-container">
                     <div class="tab-content active" id="linkedinPreviewTab">
                         <!-- LinkedIn Display Settings -->
@@ -199,15 +202,18 @@ Perfect for ANY topic - business, personal stories, tutorials, announcements, or
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="preview-area linkedin-preview" id="linkedinPreview" role="region" aria-label="LinkedIn preview">
                             <p class="preview-placeholder">Your LinkedIn-ready content will appear here...</p>
                         </div>
                         <div class="preview-footer">
-                            <button class="copy-btn" id="copyBtnLinkedIn">📋 Copy for LinkedIn</button>
-                            <div class="section-note">
-                                🎯 This shows exactly how your post will look on LinkedIn. Copy and paste directly!
+                            <div class="footer-left">
+                                <div class="character-count" id="characterCount" aria-live="polite">
+                                    <span class="count-text"><span class="count-number">0</span> / 3000</span>
+                                </div>
+                                <span class="limit-warning" id="limitWarning" style="display: none;">Over LinkedIn limit</span>
                             </div>
+                            <button class="copy-btn" id="copyBtnLinkedIn">📋 Copy for LinkedIn</button>
                         </div>
                     </div>
                     
@@ -216,10 +222,10 @@ Perfect for ANY topic - business, personal stories, tutorials, announcements, or
                             <p class="preview-placeholder">Your HTML preview will appear here...</p>
                         </div>
                         <div class="preview-footer">
-                            <button class="copy-btn" id="copyBtnHTML">📋 Copy HTML</button>
-                            <div class="section-note">
-                                📌 This shows how your content renders with full HTML formatting
+                            <div class="footer-left">
+                                <span class="preview-note-text">HTML formatted content</span>
                             </div>
+                            <button class="copy-btn" id="copyBtnHTML">📋 Copy HTML</button>
                         </div>
                     </div>
                 </div>

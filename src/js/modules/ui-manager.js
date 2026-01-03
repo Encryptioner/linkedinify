@@ -13,6 +13,14 @@ export class UIManager extends EventEmitter {
     this.app = app;
     this.logger = new Logger('UIManager');
     this.statusTimeout = null;
+    this.tipRotationInterval = null;
+    this.currentTipIndex = 0;
+    this.proTips = [
+      'Paste from anywhere - auto-converts to Markdown!',
+      'Use *italics* for quotes and subtle emphasis',
+      'Headers become bold formatted text',
+      'Lists are converted to bullet points'
+    ];
   }
 
   /**
@@ -25,10 +33,36 @@ export class UIManager extends EventEmitter {
       this.setupToolbarActions();
       this.setupLoadingStates();
       this.setupHistoryEventListeners();
+      this.startTipRotation();
       this.logger.info('UI manager initialized');
     } catch (error) {
       this.logger.error('Failed to initialize UI manager:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Start rotating through Pro Tips
+   */
+  startTipRotation() {
+    // Update tip every 5 seconds
+    this.tipRotationInterval = setInterval(() => {
+      this.currentTipIndex = (this.currentTipIndex + 1) % this.proTips.length;
+      this.updateTipDisplay();
+    }, 5000);
+  }
+
+  /**
+   * Update the displayed tip
+   */
+  updateTipDisplay() {
+    const tipTextEl = document.getElementById('tipText');
+    if (tipTextEl) {
+      tipTextEl.style.opacity = '0';
+      setTimeout(() => {
+        tipTextEl.textContent = this.proTips[this.currentTipIndex];
+        tipTextEl.style.opacity = '1';
+      }, 200);
     }
   }
 
@@ -51,16 +85,6 @@ export class UIManager extends EventEmitter {
     if (loadExampleBtn) {
       loadExampleBtn.addEventListener('click', () => {
         this.loadExample();
-      });
-    }
-
-    // Convert button
-    const convertBtn = document.getElementById('convertBtn');
-    if (convertBtn) {
-      convertBtn.addEventListener('click', () => {
-        if (this.app.convertMarkdown) {
-          this.app.convertMarkdown();
-        }
       });
     }
 
@@ -394,13 +418,66 @@ What's your biggest LinkedIn challenge? Drop it in the comments! 👇
     status.textContent = message;
     status.className = `status ${type}`;
     status.style.display = 'block';
-    
+
     // Auto-hide after duration
     this.statusTimeout = setTimeout(() => {
       status.style.display = 'none';
     }, duration);
 
     this.emit('statusShown', { message, type });
+  }
+
+  /**
+   * Update character count for LinkedIn preview
+   * Shows different visual states based on character count:
+   * - ok: under 2700 characters (safe zone)
+   * - warning: 2700-2999 characters (approaching limit)
+   * - error: 3000+ characters (over LinkedIn's limit)
+   */
+  updateCharacterCount() {
+    const characterCountEl = document.getElementById('characterCount');
+    const countNumberEl = characterCountEl?.querySelector('.count-number');
+    const limitWarningEl = document.getElementById('limitWarning');
+    const linkedinPreview = document.getElementById('linkedinPreview');
+
+    if (!characterCountEl || !countNumberEl || !linkedinPreview) {
+      return;
+    }
+
+    // Get the actual text content from the preview
+    const text = linkedinPreview.textContent || '';
+    const count = text.length;
+    const linkedInLimit = 3000;
+    const warningThreshold = 2700;
+
+    // Update the count number
+    countNumberEl.textContent = count;
+
+    // Remove all state classes
+    characterCountEl.classList.remove('ok', 'warning', 'error');
+
+    // Add appropriate state class based on count
+    if (count >= linkedInLimit) {
+      characterCountEl.classList.add('error');
+      // Show "Over LinkedIn limit" text
+      if (limitWarningEl) {
+        limitWarningEl.style.display = 'inline';
+      }
+    } else if (count >= warningThreshold) {
+      characterCountEl.classList.add('warning');
+      // Hide warning text
+      if (limitWarningEl) {
+        limitWarningEl.style.display = 'none';
+      }
+    } else {
+      characterCountEl.classList.add('ok');
+      // Hide warning text
+      if (limitWarningEl) {
+        limitWarningEl.style.display = 'none';
+      }
+    }
+
+    this.emit('characterCountUpdated', { count, limit: linkedInLimit });
   }
 
   /**
@@ -475,12 +552,9 @@ What's your biggest LinkedIn challenge? Drop it in the comments! 👇
     // Update button states based on content
     const markdownInput = document.getElementById('markdownInput');
     const hasContent = markdownInput && markdownInput.value.trim().length > 0;
-    
+
     const saveBtn = document.getElementById('savePostBtn');
-    const convertBtn = document.getElementById('convertBtn');
-    
-    if (convertBtn) convertBtn.disabled = !hasContent;
-    
+
     // For save button, check if content has changed since last save
     if (saveBtn) {
       if (!hasContent) {
@@ -583,7 +657,11 @@ What's your biggest LinkedIn challenge? Drop it in the comments! 👇
     if (this.statusTimeout) {
       clearTimeout(this.statusTimeout);
     }
-    
+
+    if (this.tipRotationInterval) {
+      clearInterval(this.tipRotationInterval);
+    }
+
     this.removeAllListeners();
     this.logger.debug('UI manager cleaned up');
   }
