@@ -47,6 +47,12 @@
     
     <!-- Prefetch DNS for external resources -->
     <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+
+    <!-- Multi-language font support (universal) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Critical Error Container -->
@@ -61,6 +67,8 @@
                 <div class="header-top">
                     <div class="header-brand">
                         <h1>🚀 LinkedInify</h1>
+                        <span class="subtitle-separator">•</span>
+                        <p class="subtitle">Transform your content</p>
                     </div>
                     <div class="header-controls">
                         <button class="history-toggle" id="historyToggle" aria-label="Toggle history">
@@ -68,49 +76,10 @@
                         </button>
                     </div>
                 </div>
-                
-                <p class="subtitle">
-                    Transform any content into LinkedIn-ready posts. Works offline, keeps your data private, and supports all languages & topics.
-                </p>
-                
-                <div class="feature-badges">
-                    <div class="badge highlight">🔒 100% Private & Offline</div>
-                    <div class="badge">🌍 All Languages</div>
-                    <div class="badge highlight">🧠 AI-Powered Titles</div>
-                    <div class="badge">⚡ Instant Preview</div>
-                    <div class="badge highlight">🆓 Forever Free</div>
-                </div>
 
-                <div class="trust-indicators">
-                    <div class="trust-item">
-                        <div class="trust-icon">🛡️</div>
-                        <div class="trust-text">
-                            <span class="trust-label">Works Offline</span>
-                            <span class="trust-desc">Download once, use forever. No internet required after first load.</span>
-                        </div>
-                    </div>
-                    <div class="trust-item">
-                        <div class="trust-icon">🔒</div>
-                        <div class="trust-text">
-                            <span class="trust-label">Your Data Stays Local</span>
-                            <span class="trust-desc">Everything stored on your device. Zero tracking, zero servers.</span>
-                        </div>
-                    </div>
-                    <div class="trust-item">
-                        <div class="trust-icon">🌍</div>
-                        <div class="trust-text">
-                            <span class="trust-label">Universal Content</span>
-                            <span class="trust-desc">Perfect for any topic, any language, any user level.</span>
-                        </div>
-                    </div>
-                    <div class="trust-item">
-                        <div class="trust-icon">📱</div>
-                        <div class="trust-text">
-                            <span class="trust-label">Install as App</span>
-                            <span class="trust-desc">Add to home screen. Works like a native mobile app.</span>
-                        </div>
-                    </div>
-                </div>
+                <p class="subtitle-description">
+                    Works offline, keeps your data private, and supports all languages & topics.
+                </p>
             </div>
         </header>
         
@@ -256,6 +225,40 @@ Perfect for ANY topic - business, personal stories, tutorials, announcements, or
                 </div>
             </section>
         </main>
+
+        <!-- Trust Indicators Section -->
+        <section class="trust-indicators-section">
+            <div class="trust-indicators">
+                <div class="trust-item">
+                    <div class="trust-icon">🛡️</div>
+                    <div class="trust-text">
+                        <span class="trust-label">Works Offline</span>
+                        <span class="trust-desc">Download once, use forever. No internet required after first load.</span>
+                    </div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-icon">🔒</div>
+                    <div class="trust-text">
+                        <span class="trust-label">Your Data Stays Local</span>
+                        <span class="trust-desc">Everything stored on your device. Zero tracking, zero servers.</span>
+                    </div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-icon">🌍</div>
+                    <div class="trust-text">
+                        <span class="trust-label">Universal Content</span>
+                        <span class="trust-desc">Perfect for any topic, any language, any user level.</span>
+                    </div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-icon">📱</div>
+                    <div class="trust-text">
+                        <span class="trust-label">Install as App</span>
+                        <span class="trust-desc">Add to home screen. Works like a native mobile app.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- Features Section -->
         <section class="features" id="features">

@@ -5,7 +5,6 @@
 
 import { EventEmitter } from '../utils/event-emitter.js';
 import { Logger } from '../utils/logger.js';
-import { Config } from '../config/app-config.js';
 
 export class ContentConverter extends EventEmitter {
   constructor({ app }) {
@@ -38,26 +37,39 @@ export class ContentConverter extends EventEmitter {
     try {
       let converted = markdown.trim();
 
-      // Convert headers to bold Unicode characters without labels
-      converted = converted.replace(/^### (.*$)/gm, (match, text) => {
-        return this.toBoldUnicode(text) + '\n';
-      });
-      converted = converted.replace(/^## (.*$)/gm, (match, text) => {
-        return this.toBoldUnicode(text) + '\n';
-      });
-      converted = converted.replace(/^# (.*$)/gm, (match, text) => {
-        return this.toBoldUnicode(text) + '\n';
-      });
+      // IMPORTANT: Process blocks BEFORE inline formatting to avoid conflicts
+      // Convert unordered lists FIRST (before italic to prevent *item being treated as italic)
+      converted = converted.replace(/^[\s]*[-*+] (.*$)/gm, '• $1');
 
+      // Convert ordered lists with proper numbering
+      converted = this.convertOrderedLists(converted);
+
+      // Now process inline formatting (lists are already converted, so no conflicts)
       // Convert bold and italic with proper LinkedIn formatting
       converted = converted.replace(/\*\*\*(.*?)\*\*\*/g, '***$1***');
-      converted = converted.replace(/\*\*(.*?)\*\*/g, (match, text) => {
+      converted = converted.replace(/\*\*(.*?)\*\*/g, (_match, text) => {
         return this.toBoldUnicode(text);
       });
-      converted = converted.replace(/(?<!\*)\*(?!\*)([^*]+)(?<!\*)\*(?!\*)/g, '📍 $1');
+      // Italic with word boundaries to avoid matching already-converted lists
+      converted = converted.replace(/(?<!\*)\*(?!\*)([^*\n]+)(?<!\*)\*(?!\*)/g, (_match, text) => {
+        // Skip if already converted to bullet point
+        if (text.trim().startsWith('•')) return _match;
+        return this.toItalicStyle(text);
+      });
+
+      // Now convert headers to bold Unicode characters (inline formatting already processed)
+      converted = converted.replace(/^### (.*$)/gm, (_match, text) => {
+        return this.toBoldUnicode(text) + '\n';
+      });
+      converted = converted.replace(/^## (.*$)/gm, (_match, text) => {
+        return this.toBoldUnicode(text) + '\n';
+      });
+      converted = converted.replace(/^# (.*$)/gm, (_match, text) => {
+        return this.toBoldUnicode(text) + '\n';
+      });
 
       // Convert code blocks with proper LinkedIn format
-      converted = converted.replace(/```(\w+)?\n([\s\S]*?)\n```/g, (match, lang, code) => {
+      converted = converted.replace(/```(\w+)?\n([\s\S]*?)\n```/g, (_match, lang, code) => {
         const language = (lang || 'CODE').toUpperCase();
         const lines = code.trim().split('\n');
         const codeBlock = lines.map(line => `│ ${line}`).join('\n');
@@ -67,14 +79,8 @@ export class ContentConverter extends EventEmitter {
       // Convert inline code (keep as is for now)
       converted = converted.replace(/`([^`]+)`/g, '$1');
 
-      // Convert blockquotes 
+      // Convert blockquotes
       converted = converted.replace(/^> (.*$)/gm, '💭 $1');
-
-      // Convert unordered lists
-      converted = converted.replace(/^[\s]*[-*+] (.*$)/gm, '• $1');
-
-      // Convert ordered lists with proper numbering
-      converted = this.convertOrderedLists(converted);
 
       // Convert markdown links to readable format
       converted = converted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1 ($2)');
@@ -101,7 +107,19 @@ export class ContentConverter extends EventEmitter {
   }
 
   /**
+   * Detect if text contains non-Latin characters
+   * Supports: Arabic, Hebrew, Devanagari, Bengali, Tamil, Telugu, Gujarati, Kannada, Malayalam,
+   *           Thai, Lao, Tibetan, Myanmar, Khmer, Chinese, Japanese, Korean, Cyrillic, Greek, Armenian, Georgian, etc.
+   */
+  hasNonLatinChars(text) {
+    // Comprehensive Unicode ranges for non-Latin scripts
+    const nonLatinRegex = /[\u0400-\u04FF\u0500-\u052F\u0590-\u05FF\u0600-\u06FF\u0700-\u074F\u0780-\u07BF\u0900-\u097F\u0980-\u09FF\u0A00-\u0A7F\u0A80-\u0AFF\u0B00-\u0B7F\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F\u0D80-\u0DFF\u0E00-\u0E7F\u0E80-\u0EFF\u0F00-\u0FFF\u1000-\u109F\u10A0-\u10FF\u1100-\u11FF\u1780-\u17FF\u1800-\u18AF\u3040-\u309F\u30A0-\u30FF\u3100-\u312F\u3130-\u318F\u3400-\u4DBF\u4E00-\u9FFF\uA000-\uA48F\uA490-\uA4CF\uAC00-\uD7AF]/;
+    return nonLatinRegex.test(text);
+  }
+
+  /**
    * Convert text to bold Unicode characters for LinkedIn
+   * Clean approach: Latin gets Unicode bold, non-Latin stays plain
    */
   toBoldUnicode(text) {
     const boldMap = {
@@ -113,8 +131,35 @@ export class ContentConverter extends EventEmitter {
       's': '𝘀', 't': '𝘁', 'u': '𝘂', 'v': '𝘃', 'w': '𝘄', 'x': '𝘅', 'y': '𝘆', 'z': '𝘇',
       '0': '𝟬', '1': '𝟭', '2': '𝟮', '3': '𝟯', '4': '𝟰', '5': '𝟱', '6': '𝟲', '7': '𝟳', '8': '𝟴', '9': '𝟵'
     };
-    
+
+    // Convert Latin characters to bold Unicode, keep non-Latin characters as-is
+    // This creates clean output: "𝗘𝗻𝗴𝗹𝗶𝘀𝗵 and বাংলা" instead of cluttered emoji markers
     return text.split('').map(char => boldMap[char] || char).join('');
+  }
+
+  /**
+   * Convert text to italic Unicode characters for LinkedIn
+   * Uses Mathematical Italic Unicode characters for Latin script
+   */
+  toItalicUnicode(text) {
+    const italicMap = {
+      'A': '𝐴', 'B': '𝐵', 'C': '𝐶', 'D': '𝐷', 'E': '𝐸', 'F': '𝐹', 'G': '𝐺', 'H': '𝐻', 'I': '𝐼',
+      'J': '𝐽', 'K': '𝐾', 'L': '𝐿', 'M': '𝑀', 'N': '𝑁', 'O': '𝑂', 'P': '𝑃', 'Q': '𝑄', 'R': '𝑅',
+      'S': '𝑆', 'T': '𝑇', 'U': '𝑈', 'V': '𝑉', 'W': '𝑊', 'X': '𝑋', 'Y': '𝑌', 'Z': '𝑍',
+      'a': '𝑎', 'b': '𝑏', 'c': '𝑐', 'd': '𝑑', 'e': '𝑒', 'f': '𝑓', 'g': '𝑔', 'h': 'ℎ', 'i': '𝑖',
+      'j': '𝑗', 'k': '𝑘', 'l': '𝑙', 'm': '𝑚', 'n': '𝑛', 'o': '𝑜', 'p': '𝑝', 'q': '𝑞', 'r': '𝑟',
+      's': '𝑠', 't': '𝑡', 'u': '𝑢', 'v': '𝑣', 'w': '𝑤', 'x': '𝑥', 'y': '𝑦', 'z': '𝑧'
+    };
+
+    // Convert Latin characters to italic Unicode, keep non-Latin characters as-is
+    return text.split('').map(char => italicMap[char] || char).join('');
+  }
+
+  /**
+   * Alias for backward compatibility
+   */
+  toItalicStyle(text) {
+    return this.toItalicUnicode(text);
   }
 
   /**
@@ -172,7 +217,7 @@ export class ContentConverter extends EventEmitter {
     let converted = markdown.trim();
     
     // Convert code blocks to Medium-style
-    converted = converted.replace(/```(\w+)?\n([\s\S]*?)\n```/g, (match, lang, code) => {
+    converted = converted.replace(/```(\w+)?\n([\s\S]*?)\n```/g, (_match, _lang, code) => {
       return `\n    ${code.trim().split('\n').join('\n    ')}\n`;
     });
 
