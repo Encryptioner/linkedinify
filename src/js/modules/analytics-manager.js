@@ -46,7 +46,7 @@ export class AnalyticsManager extends EventEmitter {
     const { enabled, measurementId, trackInDevelopment } = this.config;
 
     if (!enabled) return false;
-    if (!measurementId || measurementId === 'G-XXXXXXXXXX') return false;
+    if (!measurementId || measurementId === 'G-1L5TYN58VG') return false;
 
     const isProduction = import.meta.env.MODE === 'production';
     if (!isProduction && !trackInDevelopment) return false;
@@ -63,7 +63,7 @@ export class AnalyticsManager extends EventEmitter {
 
     if (!enabled) {
       this.logger.info('Reason: Disabled in config');
-    } else if (!measurementId || measurementId === 'G-XXXXXXXXXX') {
+    } else if (!measurementId || measurementId === 'G-1L5TYN58VG') {
       this.logger.info('Reason: Invalid or missing measurement ID');
     } else if (!isProduction && !trackInDevelopment) {
       this.logger.info('Reason: Development environment');
