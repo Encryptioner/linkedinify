@@ -203,7 +203,7 @@ export const Config = {
      * - Admin > Data Streams > Your Stream
      * - Copy the Measurement ID
      */
-    measurementId: 'G-XXXXXXXXXX', // Replace with your GA4 Measurement ID
+    measurementId: 'G-1L5TYN58VG', // Replace with your GA4 Measurement ID
 
     /**
      * Enable/disable Google Analytics
