@@ -18,7 +18,7 @@ import { ClipboardManager } from './modules/clipboard-manager.js';
 import { ServiceWorkerManager } from './modules/service-worker-manager.js';
 import { EditorManager } from './modules/editor-manager.js';
 import { AIChatManager } from './modules/ai-chat-manager.js';
-import { AnalyticsManager } from './modules/analytics-manager.js';
+import { initAnalytics, trackEvent, sanitizeError } from './modules/analytics-manager.js';
 
 /**
  * Main Application Class
@@ -67,9 +67,11 @@ class LinkedInifyApp extends EventEmitter {
    * Initialize all application modules
    */
   async initializeModules() {
+    // Initialise analytics first — fire-and-forget, no module slot needed
+    initAnalytics();
+
     const moduleConfigs = [
       ['serviceWorker', ServiceWorkerManager, { app: this }],
-      ['analytics', AnalyticsManager, { app: this }],
       ['theme', ThemeManager, { app: this }],
       ['editor', EditorManager, { app: this }],
       ['markdown', MarkdownProcessor, { app: this }],
@@ -134,6 +136,14 @@ class LinkedInifyApp extends EventEmitter {
     // Unhandled promise rejections
     window.addEventListener('unhandledrejection', event => {
       this.logger.error('Unhandled promise rejection:', event.reason);
+      trackEvent({
+        name: 'error_occurred',
+        params: {
+          category: 'unhandled_rejection',
+          action: 'promise',
+          error: sanitizeError(event.reason?.message ?? String(event.reason)),
+        },
+      });
       this.handleError(event.reason);
       event.preventDefault();
     });
@@ -145,6 +155,14 @@ class LinkedInifyApp extends EventEmitter {
   setupErrorHandling() {
     window.addEventListener('error', event => {
       this.logger.error('Global error:', event.error);
+      trackEvent({
+        name: 'error_occurred',
+        params: {
+          category: 'global_error',
+          action: event.filename ?? 'unknown',
+          error: sanitizeError(event.error?.message ?? String(event.message)),
+        },
+      });
       this.handleError(event.error);
     });
   }
@@ -214,7 +232,16 @@ class LinkedInifyApp extends EventEmitter {
 
       // Auto-save
       this.modules.get('history').autoSave(markdown);
-      
+
+      // Track conversion
+      trackEvent({
+        name: 'post_converted',
+        params: {
+          content_length: linkedinContent.length,
+          has_emoji: /\p{Emoji}/u.test(linkedinContent),
+        },
+      });
+
       this.emit('contentConverted', { markdown, html: htmlContent, linkedin: linkedinContent });
       
     } catch (error) {
@@ -236,7 +263,9 @@ class LinkedInifyApp extends EventEmitter {
       
       const postId = await this.modules.get('history').savePost('', content);
       this.modules.get('ui').showStatus('Post saved successfully!', 'success');
-      
+
+      trackEvent({ name: 'post_saved', params: { content_length: content.length } });
+
       this.emit('postSaved', { postId, content });
       
     } catch (error) {

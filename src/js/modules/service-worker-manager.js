@@ -6,6 +6,7 @@
 import { EventEmitter } from '../utils/event-emitter.js';
 import { Logger } from '../utils/logger.js';
 import { Config } from '../config/app-config.js';
+import { trackEvent } from './analytics-manager.js';
 
 export class ServiceWorkerManager extends EventEmitter {
   constructor({ app }) {
@@ -36,7 +37,8 @@ export class ServiceWorkerManager extends EventEmitter {
 
       await this.registerServiceWorker();
       this.setupUpdateChecking();
-      
+      this.setupInstallTracking();
+
       this.logger.info('Service worker manager initialized');
     } catch (error) {
       this.logger.error('Failed to initialize service worker manager:', error);
@@ -189,6 +191,18 @@ export class ServiceWorkerManager extends EventEmitter {
       this.logger.error('Failed to skip waiting:', error);
       this.emit('skipWaitingError', { error });
     }
+  }
+
+  /**
+   * Track PWA install prompt acceptance.
+   * The 'appinstalled' event fires after the user accepts the install prompt.
+   */
+  setupInstallTracking() {
+    window.addEventListener('appinstalled', () => {
+      this.logger.info('PWA installed');
+      trackEvent({ name: 'pwa_installed' });
+      this.emit('pwaInstalled');
+    });
   }
 
   /**

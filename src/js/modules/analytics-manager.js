@@ -1,212 +1,127 @@
 /**
- * LinkedInify - Google Analytics Manager
- * Handles Google Analytics 4 integration with privacy-first approach
+ * LinkedInify — Analytics Module
+ *
+ * Typed, fire-and-forget Google Analytics 4 event tracking.
+ * Module pattern — no class, no EventEmitter dependency.
+ *
+ * Usage:
+ *   import { initAnalytics, trackEvent } from './analytics-manager.js';
+ *   initAnalytics();
+ *   trackEvent({ name: 'content_copied', params: { content_type: 'linkedin' } });
  */
 
-import { EventEmitter } from '../utils/event-emitter.js';
+import { Config } from '../config/app-config.js';
 import { Logger } from '../utils/logger.js';
 
-export class AnalyticsManager extends EventEmitter {
-  constructor({ app }) {
-    super();
-    this.app = app;
-    this.logger = new Logger('AnalyticsManager');
-    this.config = this.app.config.googleAnalytics;
-    this.initialized = false;
+const logger = new Logger('Analytics');
+
+// ── Type Definition ─────────────────────────────────────────────────────────
+
+/**
+ * @typedef {
+ *   | { name: 'post_converted', params: { content_length: number, has_emoji: boolean } }
+ *   | { name: 'content_copied', params: { content_type: 'linkedin' | 'markdown' | 'plain' } }
+ *   | { name: 'copy_failed', params: { error: string } }
+ *   | { name: 'title_generated', params: { category: string, language: string } }
+ *   | { name: 'title_accepted' }
+ *   | { name: 'title_regenerated' }
+ *   | { name: 'post_saved', params: { content_length: number } }
+ *   | { name: 'post_loaded' }
+ *   | { name: 'post_deleted' }
+ *   | { name: 'draft_auto_saved' }
+ *   | { name: 'preview_mode_changed', params: { viewport: 'desktop' | 'mobile' } }
+ *   | { name: 'preview_theme_changed', params: { theme: 'dark' | 'light' } }
+ *   | { name: 'theme_toggled', params: { theme: 'dark' | 'light' } }
+ *   | { name: 'ai_chat_opened' }
+ *   | { name: 'pwa_installed' }
+ *   | { name: 'error_occurred', params: { category: string, action: string, error: string } }
+ * } AnalyticsEvent
+ */
+
+// ── Private helpers ──────────────────────────────────────────────────────────
+
+const EMAIL_PATTERN = /[\w.+-]+@[\w.-]+\.\w+/g;
+
+/**
+ * Strip email addresses from error messages to prevent PII leakage.
+ * @param {string} msg
+ * @returns {string}
+ */
+export function sanitizeError(msg) {
+  if (!msg || typeof msg !== 'string') return 'unknown';
+  return msg.replace(EMAIL_PATTERN, '[email]').slice(0, 100);
+}
+
+/**
+ * Determine whether we should actually send events.
+ * @returns {boolean}
+ */
+function shouldTrack() {
+  const { enabled, measurementId, trackInDevelopment } = Config.googleAnalytics;
+  if (!enabled) return false;
+  if (!measurementId) return false;
+  const isProduction = import.meta.env.MODE === 'production';
+  if (!isProduction && !trackInDevelopment) return false;
+  return true;
+}
+
+// ── GA script loader ─────────────────────────────────────────────────────────
+
+/**
+ * Inject gtag.js and configure GA4 for this SPA.
+ * Call once at app boot — safe to call multiple times (guards internally).
+ */
+export function initAnalytics() {
+  if (!shouldTrack()) {
+    logger.info('Analytics disabled — skipping init');
+    return;
   }
 
-  /**
-   * Initialize Google Analytics
-   */
-  async init() {
-    try {
-      if (!this.shouldTrack()) {
-        this.logger.info('Analytics tracking disabled');
-        this.logDisabledReason();
-        return;
-      }
+  const { measurementId } = Config.googleAnalytics;
 
-      this.loadGoogleAnalyticsScript();
-      this.initializeGoogleAnalytics();
-      this.trackPageView();
-
-      this.initialized = true;
-      this.logger.info('Google Analytics initialized successfully');
-
-    } catch (error) {
-      this.logger.error('Failed to initialize Google Analytics:', error);
-      this.emit('analyticsError', error);
-    }
+  // Avoid double-injection
+  if (document.getElementById('ga-script')) {
+    logger.debug('GA script already present');
+    return;
   }
 
-  /**
-   * Determine if tracking should be enabled
-   */
-  shouldTrack() {
-    const { enabled, measurementId, trackInDevelopment } = this.config;
+  // Initialise dataLayer + gtag function
+  window.dataLayer = window.dataLayer || [];
+  // eslint-disable-next-line prefer-rest-params
+  window.gtag = function gtag() { window.dataLayer.push(arguments); };
 
-    if (!enabled) return false;
-    if (!measurementId || measurementId === 'G-1L5TYN58VG') return false;
+  // Load the gtag.js script
+  const script = document.createElement('script');
+  script.id = 'ga-script';
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+  document.head.appendChild(script);
 
-    const isProduction = import.meta.env.MODE === 'production';
-    if (!isProduction && !trackInDevelopment) return false;
+  // Configure — send_page_view: false because this is a SPA
+  window.gtag('js', new Date());
+  window.gtag('config', measurementId, { send_page_view: false });
 
-    return true;
-  }
+  logger.info(`Google Analytics initialised (${measurementId})`);
+}
 
-  /**
-   * Log reason for disabled tracking
-   */
-  logDisabledReason() {
-    const { enabled, measurementId, trackInDevelopment } = this.config;
-    const isProduction = import.meta.env.MODE === 'production';
+// ── Core tracking function ───────────────────────────────────────────────────
 
-    if (!enabled) {
-      this.logger.info('Reason: Disabled in config');
-    } else if (!measurementId || measurementId === 'G-1L5TYN58VG') {
-      this.logger.info('Reason: Invalid or missing measurement ID');
-    } else if (!isProduction && !trackInDevelopment) {
-      this.logger.info('Reason: Development environment');
-    }
-  }
+/**
+ * Send a typed analytics event to Google Analytics.
+ * No-ops gracefully when gtag is unavailable (ad blockers, SSR, disabled).
+ *
+ * @param {AnalyticsEvent} event
+ */
+export function trackEvent(event) {
+  if (typeof window === 'undefined' || !window.gtag) return;
+  if (!shouldTrack()) return;
 
-  /**
-   * Load Google Analytics script dynamically
-   */
-  loadGoogleAnalyticsScript() {
-    const measurementId = this.config.measurementId;
-
-    // Add gtag.js script
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
-    document.head.appendChild(script);
-
-    // Initialize dataLayer
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function() {
-      window.dataLayer.push(arguments);
-    };
-  }
-
-  /**
-   * Initialize Google Analytics with config
-   */
-  initializeGoogleAnalytics() {
-    window.gtag('js', new Date());
-    window.gtag('config', this.config.measurementId, {
-      send_page_view: false, // We'll send manually
-    });
-
-    this.logger.info(`Initialized with ID: ${this.config.measurementId}`);
-  }
-
-  /**
-   * Track a page view
-   */
-  trackPageView(path = window.location.pathname) {
-    if (!this.initialized || !window.gtag) return;
-
-    try {
-      window.gtag('event', 'page_view', {
-        page_path: path,
-        page_title: document.title,
-      });
-
-      this.logger.debug(`Page view tracked: ${path}`);
-    } catch (error) {
-      this.logger.error('Page view tracking error:', error);
-    }
-  }
-
-  /**
-   * Track a custom event
-   * @param {string} eventName - Name of the event
-   * @param {Object} params - Event parameters
-   */
-  trackEvent(eventName, params = {}) {
-    if (!this.initialized || !window.gtag) return;
-
-    try {
-      window.gtag('event', eventName, params);
-      this.logger.debug(`Event tracked: ${eventName}`, params);
-    } catch (error) {
-      this.logger.error('Event tracking error:', error);
-    }
-  }
-
-  /**
-   * Track content conversion
-   */
-  trackConversion() {
-    this.trackEvent('convert_content', {
-      category: 'Conversion',
-      action: 'Markdown to LinkedIn',
-    });
-  }
-
-  /**
-   * Track content copy
-   */
-  trackCopy(contentType = 'linkedin') {
-    this.trackEvent('copy_content', {
-      category: 'Engagement',
-      content_type: contentType,
-    });
-  }
-
-  /**
-   * Track post save
-   */
-  trackSavePost() {
-    this.trackEvent('save_post', {
-      category: 'Content',
-      action: 'Save Post',
-    });
-  }
-
-  /**
-   * Track title generation
-   */
-  trackTitleGeneration(category = 'unknown') {
-    this.trackEvent('generate_title', {
-      category: 'AI Features',
-      title_category: category,
-    });
-  }
-
-  /**
-   * Track theme change
-   */
-  trackThemeChange(theme) {
-    this.trackEvent('change_theme', {
-      category: 'Preferences',
-      theme: theme,
-    });
-  }
-
-  /**
-   * Track preview mode change
-   */
-  trackPreviewChange(mode) {
-    this.trackEvent('change_preview', {
-      category: 'Preferences',
-      preview_mode: mode,
-    });
-  }
-
-  /**
-   * Check if analytics is healthy
-   */
-  isHealthy() {
-    return this.initialized || !this.config.enabled;
-  }
-
-  /**
-   * Cleanup resources
-   */
-  cleanup() {
-    this.removeAllListeners();
-    this.logger.debug('Analytics manager cleaned up');
+  try {
+    const { name, ...rest } = event;
+    const params = 'params' in rest ? rest.params : undefined;
+    window.gtag('event', name, params);
+    logger.debug(`Tracked: ${name}`, params ?? '');
+  } catch (err) {
+    logger.error('trackEvent failed:', err);
   }
 }

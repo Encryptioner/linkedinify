@@ -6,6 +6,7 @@
 import { EventEmitter } from '../utils/event-emitter.js';
 import { Logger } from '../utils/logger.js';
 import { Config } from '../config/app-config.js';
+import { trackEvent } from './analytics-manager.js';
 
 export class ThemeManager extends EventEmitter {
   constructor({ app }) {
@@ -127,7 +128,7 @@ export class ThemeManager extends EventEmitter {
   async toggle() {
     const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
     await this.applyTheme(newTheme, true);
-    
+    trackEvent({ name: 'theme_toggled', params: { theme: newTheme } });
     this.logger.debug(`Theme toggled to: ${newTheme}`);
   }
 

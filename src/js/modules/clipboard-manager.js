@@ -6,6 +6,7 @@
 import { EventEmitter } from '../utils/event-emitter.js';
 import { Logger } from '../utils/logger.js';
 import { Config } from '../config/app-config.js';
+import { trackEvent, sanitizeError } from './analytics-manager.js';
 
 export class ClipboardManager extends EventEmitter {
   constructor({ app }) {
@@ -90,6 +91,7 @@ export class ClipboardManager extends EventEmitter {
       
     } catch (error) {
       this.logger.error('Failed to copy text:', error);
+      trackEvent({ name: 'copy_failed', params: { error: sanitizeError(error.message) } });
       this.emit('copyError', { text, error });
       throw error;
     }
@@ -215,14 +217,16 @@ export class ClipboardManager extends EventEmitter {
       }
       
       await this.copyText(text, 'text/plain');
-      
-      this.emit('linkedinCopied', { 
-        text, 
-        length: text.length 
+
+      trackEvent({ name: 'content_copied', params: { content_type: 'linkedin' } });
+
+      this.emit('linkedinCopied', {
+        text,
+        length: text.length
       });
-      
+
       return text;
-      
+
     } catch (error) {
       this.logger.error('Failed to copy LinkedIn content:', error);
       throw error;
@@ -247,14 +251,16 @@ export class ClipboardManager extends EventEmitter {
       }
       
       await this.copyText(text, 'text/markdown');
-      
-      this.emit('markdownCopied', { 
-        text, 
-        length: text.length 
+
+      trackEvent({ name: 'content_copied', params: { content_type: 'markdown' } });
+
+      this.emit('markdownCopied', {
+        text,
+        length: text.length
       });
-      
+
       return text;
-      
+
     } catch (error) {
       this.logger.error('Failed to copy markdown content:', error);
       throw error;
