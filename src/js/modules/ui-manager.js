@@ -6,6 +6,7 @@
 import { EventEmitter } from '../utils/event-emitter.js';
 import { Logger } from '../utils/logger.js';
 import { Config } from '../config/app-config.js';
+import { trackEvent, sanitizeError } from './analytics-manager.js';
 
 export class UIManager extends EventEmitter {
   constructor({ app }) {
@@ -347,13 +348,16 @@ What's your biggest LinkedIn challenge? Drop it in the comments! 👇
 
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(content);
+        trackEvent({ name: 'content_copied', params: { content_type: 'linkedin' } });
         this.showCopySuccessForButton('copyBtnLinkedIn', 'LinkedIn content');
       } else {
         this.fallbackCopy(content);
+        trackEvent({ name: 'content_copied', params: { content_type: 'linkedin' } });
       }
-      
+
     } catch (error) {
       this.logger.error('Failed to copy LinkedIn content:', error);
+      trackEvent({ name: 'copy_failed', params: { error: sanitizeError(error.message) } });
       this.showStatus('Copy failed. Please try again.', 'error');
     }
   }
@@ -372,13 +376,16 @@ What's your biggest LinkedIn challenge? Drop it in the comments! 👇
 
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(content);
+        trackEvent({ name: 'content_copied', params: { content_type: 'plain' } });
         this.showCopySuccessForButton('copyBtnHTML', 'HTML content');
       } else {
         this.fallbackCopy(content);
+        trackEvent({ name: 'content_copied', params: { content_type: 'plain' } });
       }
-      
+
     } catch (error) {
       this.logger.error('Failed to copy HTML content:', error);
+      trackEvent({ name: 'copy_failed', params: { error: sanitizeError(error.message) } });
       this.showStatus('Copy failed. Please try again.', 'error');
     }
   }

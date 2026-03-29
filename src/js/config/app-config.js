@@ -210,7 +210,7 @@ export const Config = {
      * Set to false to disable all tracking
      * Privacy-first: disabled by default
      */
-    enabled: false, // Set to true when you add your measurement ID
+    enabled: true,
 
     /**
      * Track in development environment

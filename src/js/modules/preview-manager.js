@@ -6,6 +6,7 @@
 import { EventEmitter } from '../utils/event-emitter.js';
 import { Logger } from '../utils/logger.js';
 import { Config } from '../config/app-config.js';
+import { trackEvent } from './analytics-manager.js';
 
 export class PreviewManager extends EventEmitter {
   constructor({ app }) {
@@ -75,6 +76,7 @@ export class PreviewManager extends EventEmitter {
         btn.classList.toggle('active', btn.dataset.theme === theme);
       });
 
+      trackEvent({ name: 'preview_theme_changed', params: { theme } });
       this.emit('linkedinThemeChanged', { theme });
       this.logger.debug(`LinkedIn theme set to: ${theme}`);
       
@@ -109,6 +111,9 @@ export class PreviewManager extends EventEmitter {
         btn.classList.toggle('active', btn.dataset.view === view);
       });
 
+      // Normalise to the analytics vocabulary: web → desktop
+      const viewport = view === 'mobile' ? 'mobile' : 'desktop';
+      trackEvent({ name: 'preview_mode_changed', params: { viewport } });
       this.emit('linkedinViewChanged', { view });
       this.logger.debug(`LinkedIn view set to: ${view}`);
       
