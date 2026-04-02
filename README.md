@@ -373,3 +373,11 @@ See [LICENSE](LICENSE) file for details.
 *Empowering everyone to share their stories on LinkedIn beautifully*
 
 ![LinkedInify Logo](https://img.shields.io/badge/LinkedInify-Markdown%20to%20LinkedIn-0077b5?style=for-the-badge&logo=linkedin)
+
+---
+
+## Support
+
+If you find my work useful, consider supporting it:
+
+[![SupportKori](https://img.shields.io/badge/SupportKori-☕-FFDD00?style=flat-square)](https://www.supportkori.com/mirmursalinankur)
