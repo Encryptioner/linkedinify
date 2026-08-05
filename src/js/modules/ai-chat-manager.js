@@ -155,15 +155,17 @@ export class AIChatManager extends EventEmitter {
         return '';
       }
 
-      const systemParam = encodeURIComponent(this.config.systemMessage);
+      const personaParam = encodeURIComponent(this.config.persona);
       const domainParam = encodeURIComponent(this.getCurrentDomain());
+      // label/persona are forwarded by embed.js to the iframe → greeting + opening line.
+      const labelParam = this.config.label ? `&label=${encodeURIComponent(this.config.label)}` : '';
 
-      const finalUrl = `${baseUrl}?system=${systemParam}&domain=${domainParam}`;
+      const finalUrl = `${baseUrl}?persona=${personaParam}&domain=${domainParam}${labelParam}`;
 
       if (this.config.debug) {
         this.logger.debug('Built AI Chat embed URL:', finalUrl);
         this.logger.debug('Base script URL:', baseUrl);
-        this.logger.debug('System param length:', systemParam.length);
+        this.logger.debug('Persona param length:', personaParam.length);
         this.logger.debug('Domain param:', domainParam);
       }
 

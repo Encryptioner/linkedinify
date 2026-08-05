@@ -182,14 +182,12 @@ export const Config = {
   aiChat: {
     enabled: true, // Set to false to disable chat widget
     embedScriptUrl: 'https://encryptioner.github.io/private-chat/embed.js',
-    systemMessage: `
-      You are a helpful assistant for LinkedInify, a privacy-first markdown to LinkedIn post converter.
-      You can help users understand how to convert their markdown content to LinkedIn-ready posts.
-      Be friendly, professional, and concise in your responses.
-      Focus on helping users format their content effectively for LinkedIn.
-    `.replace(/\n/g, ' ').trim(),
+    // Opening identity line only (private-chat's `persona` param) — the widget's own
+    // grounding/format instructions always apply on top of this, so keep it to one sentence.
+    persona: 'You are a friendly assistant for LinkedInify, a privacy-first markdown to LinkedIn post converter.',
     fallbackEnabled: true, // Try to load script without parameters if initial load fails
     debug: isDevelopment, // Enable debug logging in development
+    label: 'LinkedInify', // Shown in the widget greeting (e.g. "How can LinkedInify help you?")
   },
 
   // Google Analytics Configuration
