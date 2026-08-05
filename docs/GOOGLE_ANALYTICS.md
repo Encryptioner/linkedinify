@@ -8,7 +8,7 @@ Quick setup guide for Google Analytics 4 in LinkedInify.
 
 1. Visit [analytics.google.com](https://analytics.google.com/)
 2. Admin → Data Streams → Your Stream
-3. Copy your Measurement ID (G-XXXXXXXXXX)
+3. Copy your Measurement ID (G-1L5TYN58VG)
 
 ### 2. Configure
 
@@ -33,7 +33,7 @@ pnpm deploy
 
 Check browser console for:
 ```
-[Google Analytics] Initialized successfully with ID: G-XXXXXXXXXX
+[Google Analytics] Initialized successfully with ID: G-1L5TYN58VG
 ```
 
 ## Tracked Events

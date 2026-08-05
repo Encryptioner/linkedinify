@@ -5,6 +5,7 @@
 
 import { EventEmitter } from '../utils/event-emitter.js';
 import { Logger } from '../utils/logger.js';
+import { trackEvent } from './analytics-manager.js';
 
 export class AIChatManager extends EventEmitter {
   constructor({ app }) {
@@ -79,6 +80,10 @@ export class AIChatManager extends EventEmitter {
           this.logger.info('AI Chat embed script loaded successfully');
           this.isLoaded = true;
           this.emit('scriptLoaded');
+
+          // Listen for the user actually opening the chat widget
+          this._setupChatOpenListener();
+
           resolve();
         };
 
@@ -237,6 +242,12 @@ export class AIChatManager extends EventEmitter {
 
     this.isLoaded = false;
     this.isInitialized = false;
+
+    if (this._chatOpenHandler) {
+      document.removeEventListener('click', this._chatOpenHandler, true);
+      this._chatOpenHandler = null;
+    }
+
     this.removeAllListeners();
 
     this.logger.debug('AI Chat Manager cleaned up');
@@ -264,6 +275,26 @@ export class AIChatManager extends EventEmitter {
       this.cleanup();
       this.logger.info('AI Chat disabled');
     }
+  }
+
+  /**
+   * Set up a delegated click listener for the private-chat toggle button.
+   * Fires ai_chat_opened once when the user first opens the widget.
+   * The embed renders a button with id="private-chat-toggle" or class="private-chat-toggle".
+   */
+  _setupChatOpenListener() {
+    let hasFired = false;
+
+    const handler = (event) => {
+      const toggle = event.target.closest('#private-chat-toggle, .private-chat-toggle, [data-chat-toggle]');
+      if (!toggle || hasFired) return;
+      hasFired = true;
+      trackEvent({ name: 'ai_chat_opened' });
+      document.removeEventListener('click', handler, true);
+    };
+
+    document.addEventListener('click', handler, true);
+    this._chatOpenHandler = handler; // Store for cleanup
   }
 
   /**

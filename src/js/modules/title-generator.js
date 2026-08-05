@@ -6,6 +6,7 @@
 import { EventEmitter } from '../utils/event-emitter.js';
 import { Logger } from '../utils/logger.js';
 import { Config } from '../config/app-config.js';
+import { trackEvent } from './analytics-manager.js';
 
 export class TitleGenerator extends EventEmitter {
   constructor({ app }) {
@@ -83,14 +84,17 @@ export class TitleGenerator extends EventEmitter {
       // Analyze content to determine category
       const category = this.analyzeContentCategory(content);
       const pattern = this.patterns[category];
-      
+
+      // Detect language: non-Latin scripts indicate a non-English language
+      const language = this.hasNonLatinChars(content) ? 'non-latin' : 'latin';
+
       // Generate title based on pattern
       const emoji = this.getRandomElement(pattern.emojis);
       const template = this.getRandomElement(pattern.templates);
-      
+
       // Try to extract meaningful keywords from content
       const contentKeywords = this.extractKeywords(content);
-      
+
       // Create contextual title if possible
       if (contentKeywords.length > 0) {
         const keyword = this.getRandomElement(contentKeywords);
@@ -100,13 +104,15 @@ export class TitleGenerator extends EventEmitter {
           `${template} - ${keyword} ${emoji}`,
           `${emoji} ${template} About ${keyword}`,
         ];
-        
+
         const title = this.getRandomElement(variations);
+        trackEvent({ name: 'title_generated', params: { category, language } });
         return this.truncateTitle(title);
       }
-      
+
       // Fallback to pattern-based title
       const title = `${emoji} ${template}`;
+      trackEvent({ name: 'title_generated', params: { category, language } });
       return this.truncateTitle(title);
       
     } catch (error) {
@@ -256,10 +262,34 @@ export class TitleGenerator extends EventEmitter {
   }
 
   /**
+   * Detect if text contains non-Latin characters (used for language detection).
+   * @param {string} text
+   * @returns {boolean}
+   */
+  hasNonLatinChars(text) {
+    const nonLatinRegex = /[\u0400-\u04FF\u0590-\u05FF\u0600-\u06FF\u0900-\u097F\u0980-\u09FF\u4E00-\u9FFF\uAC00-\uD7AF]/;
+    return nonLatinRegex.test(text);
+  }
+
+  /**
    * Get available categories
    */
   getAvailableCategories() {
     return Object.keys(this.patterns);
+  }
+
+  /**
+   * Call when the user keeps / inserts the generated title.
+   */
+  trackTitleAccepted() {
+    trackEvent({ name: 'title_accepted' });
+  }
+
+  /**
+   * Call when the user asks for another title suggestion.
+   */
+  trackTitleRegenerated() {
+    trackEvent({ name: 'title_regenerated' });
   }
 
   /**

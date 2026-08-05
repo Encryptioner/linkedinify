@@ -201,14 +201,14 @@ export const Config = {
      * - Admin > Data Streams > Your Stream
      * - Copy the Measurement ID
      */
-    measurementId: 'G-XXXXXXXXXX', // Replace with your GA4 Measurement ID
+    measurementId: 'G-1L5TYN58VG', // Replace with your GA4 Measurement ID
 
     /**
      * Enable/disable Google Analytics
      * Set to false to disable all tracking
      * Privacy-first: disabled by default
      */
-    enabled: false, // Set to true when you add your measurement ID
+    enabled: true,
 
     /**
      * Track in development environment

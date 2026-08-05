@@ -6,6 +6,7 @@
 import { EventEmitter } from '../utils/event-emitter.js';
 import { Logger } from '../utils/logger.js';
 import { Config } from '../config/app-config.js';
+import { trackEvent } from './analytics-manager.js';
 
 export class HistoryManager extends EventEmitter {
   constructor({ app }) {
@@ -17,6 +18,8 @@ export class HistoryManager extends EventEmitter {
     this.isOpen = false;
     this.lastSavedContent = null;
     this.lastSavedTitle = null;
+    /** @type {number} Timestamp of last draft_auto_saved event (throttle gate) */
+    this._lastAutoSaveEventMs = 0;
   }
 
   /**
@@ -173,6 +176,7 @@ export class HistoryManager extends EventEmitter {
         }
       }
 
+      trackEvent({ name: 'post_loaded' });
       this.emit('postLoaded', { post });
       this.logger.info(`Post loaded: ${post.title}`);
       
@@ -201,6 +205,7 @@ export class HistoryManager extends EventEmitter {
       // Update UI
       this.renderHistory();
 
+      trackEvent({ name: 'post_deleted' });
       this.emit('postDeleted', { post: deletedPost });
       this.logger.info(`Post deleted: ${deletedPost.title}`);
       
@@ -222,6 +227,14 @@ export class HistoryManager extends EventEmitter {
       if (content && content.trim()) {
         try {
           localStorage.setItem(Config.storage.keys.draft, content);
+
+          // Fire analytics event at most once every 30 seconds
+          const now = Date.now();
+          if (now - this._lastAutoSaveEventMs >= 30_000) {
+            trackEvent({ name: 'draft_auto_saved' });
+            this._lastAutoSaveEventMs = now;
+          }
+
           this.emit('draftSaved', { content });
         } catch (error) {
           this.logger.warn('Failed to auto-save draft:', error);
